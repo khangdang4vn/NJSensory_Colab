@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="edu.ucsd.calab.extrasensory" >
+
+    <meta-data
+        android:name="com.google.android.gms.version"
+        android:value="@integer/google_play_services_version" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.BACKGROUND_SERVICE"/>
+
+    <uses-permission android:name="android.permission.BIND_JOB_SERVICE"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!-- needed to get display name for a given number -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!--  permissions below allow deleting conversations after backup -->
+    <!-- WRITE_SMS permission is removed from Marshmallow (6.0 2016) -->
+    <uses-permission android:name="android.permission.WRITE_SMS" />
+    <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
+    <!-- uses-permission android:name="android.permission.WRITE_CONTACTS" -->
+    <!-- <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" /> -->
+
+    <!-- Polar SDK needs Bluetooth scan permission to search for BLE devices.-->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+
+    <!-- Polar SDK needs Bluetooth connect permission to connect for found BLE devices.-->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <!-- Allows Polar SDK to connect to paired bluetooth devices. Legacy Bluetooth permission,
+     which is needed on devices with API 30 (Android Q) or older. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH" />
+
+    <!-- Allows Polar SDK to discover and pair bluetooth devices. Legacy Bluetooth permission,
+     which is needed on devices with API 30 (Android Q) or older. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <!-- Polar SDK needs the fine location permission to get results for Bluetooth scan. Request
+    fine location permission on devices with API 30 (Android Q). -->
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- The coarse location permission is needed, if fine location permission is requested. Request
+     coarse location permission on devices with API 30 (Android Q). -->
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <application
+        android:name=".ESApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light" >
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTop"
+            android:exported="true"
+            tools:node="merge">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".ESIntentService"
+            android:exported="false" >
+        </service>
+
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:label="@string/title_activity_setting"
+            android:parentActivityName=".ui.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.ucsd.calab.extrasensory.ui.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ui.FeedbackActivity"
+            android:label="@string/title_activity_label"
+            android:parentActivityName=".ui.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.ucsd.calab.extrasensory.ui.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ui.SelectionFromListActivity"
+            android:label="@string/title_activity_selection_from_list"
+            android:parentActivityName=".ui.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.ucsd.calab.extrasensory.ui.MainActivity" />
+        </activity>
+        <activity
+            android:name=".conversationbackup.ConversationBackupActivity"
+            android:label="Conversation Backup - Home"
+            android:launchMode="singleTask"
+            android:parentActivityName=".ui.MainActivity"
+            android:exported="true"
+            tools:node="merge">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.ucsd.calab.extrasensory.ui.MainActivity" />
+            <intent-filter>
+                <action android:name=".conversationbackup.UPDATE_PROGRESS" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="http"
+                    android:host="extrasensory.net"
+                    android:pathPrefix="/project/android-conversation-backup" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".conversationbackup.ArchivesActivity"
+            android:label="Conversation Backup - Archives"
+            android:parentActivityName=".ui.MainActivity"
+            android:exported="true"
+            tools:node="merge">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.ucsd.calab.extrasensory.ui.MainActivity" />
+            <intent-filter>
+                <action android:name=".conversationbackup.ARCHIVES" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".sensors.polarandroidblesdk.PolarActivity"
+            android:label="Polar"
+            android:parentActivityName=".ui.MainActivity"
+            android:launchMode="singleTask"
+            android:exported="true">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.ucsd.calab.extrasensory.ui.MainActivity" />
+            <intent-filter>
+                <action android:name=".sensors.polarandroidblesdk.PolarActivity" />
+            </intent-filter>
+        </activity>
+        <service android:name=".conversationbackup.ProcessingService" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+    </application>
+
+</manifest>

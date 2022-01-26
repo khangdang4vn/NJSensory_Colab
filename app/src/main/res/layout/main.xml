@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" 
+  android:id="@+id/main_scrollview"
+  android:fillViewport="true" 
+  android:layout_width="fill_parent" 
+  android:layout_height="wrap_content">
+  <LinearLayout android:id="@+id/main_layout"
+     android:orientation="vertical" 
+     android:layout_width="fill_parent"
+     android:layout_height="fill_parent" 
+     android:scrollbarAlwaysDrawVerticalTrack="true" >
+    <TextView android:id="@+id/summary"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content" 
+              android:text="@string/summary" />
+    <View android:id="@+id/divider"
+          android:background="@drawable/black_white_gradient"
+          android:layout_width="fill_parent"
+          android:layout_height="1dp"
+          android:layout_below="@id/summary" />
+
+    <!--
+    <LinearLayout android:id="@+id/specific_numbers_to_backup_linear_layout"
+                  android:orientation="horizontal" 
+                  android:layout_width="fill_parent"
+                  android:layout_height="fill_parent"
+                  android:layout_below="@id/specific_numbers_to_backup_label" >
+    </LinearLayout>
+    -->
+    <View
+          android:background="@drawable/black_white_gradient"
+          android:layout_width="fill_parent"
+          android:layout_height="1dp"
+           />
+
+    <View
+          android:background="@drawable/black_white_gradient"
+          android:layout_width="fill_parent"
+          android:layout_height="1dp"
+          />
+    <!-- Make all options invisible for now -->
+    <!--
+    <TextView android:id="@+id/share_archive_label" 
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content" 
+              android:text="Send backup below" />
+    -->
+    <View
+          android:background="@drawable/black_white_gradient"
+          android:layout_width="fill_parent"
+          android:layout_height="1dp"
+         />
+    <LinearLayout 
+                  android:orientation="horizontal" 
+                  android:layout_width="fill_parent"
+                  android:layout_height="fill_parent" >
+      <Button 
+         android:id="@+id/confirm" 
+         android:layout_width="wrap_content" 
+         android:layout_height="wrap_content" 
+         android:text="@string/run_backup" />
+      <Button 
+         android:id="@+id/exit_app" 
+         android:layout_width="wrap_content" 
+         android:layout_height="wrap_content" 
+         android:text="@string/exit_app" />
+    </LinearLayout>
+    <CheckBox android:id="@+id/random_question"
+              android:visibility="gone"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:contentDescription="random_question"
+              android:text="@string/main_result_random_question" />
+  </LinearLayout>
+</ScrollView>

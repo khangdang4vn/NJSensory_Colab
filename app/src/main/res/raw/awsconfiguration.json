@@ -1,0 +1,36 @@
+{
+  "Version": "1.0",
+  "IdentityManager": {
+    "Default": {}
+  },
+  "CredentialsProvider": {
+    "CognitoIdentity": {
+      "Default": {
+        "PoolId": "us-east-2:acd7d7c3-cd9c-4a23-9c8c-160b075acff4",
+        "Region": "us-east-2"
+      }
+    }
+  },
+  "APIUrl": {
+    "Default": {
+      "RESTAPI": "https://nq5wjof0e2.execute-api.us-east-2.amazonaws.com/test/abc123-rtc-handler"
+    }
+  },
+  "ModelID": {
+    "Default": {
+      "HAR": "model_AIDLClient_202010141408_abc123"
+    }
+  },
+  "S3TransferUtility": {
+    "Default": {
+      "Bucket": "fl-iyamfr-1635977034-fl-server-client-models",
+      "Region": "us-east-2"
+    }
+  },
+  "S3DataUploadTestUtility": {
+    "Default": {
+      "Bucket": "new-data-collection-test",
+      "Region": "us-east-2"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+<androidx.fragment.app.FragmentTabHost
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@android:id/tabhost"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" ><![CDATA[
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context="edu.ucsd.calab.extrasensory.MainActivity">
+
+    ]]>
+
+    <TabWidget
+        android:id="@android:id/tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <FrameLayout
+        android:id="@android:id/tabcontent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="62dp">
+
+    </FrameLayout>
+
+
+
+</androidx.fragment.app.FragmentTabHost>
