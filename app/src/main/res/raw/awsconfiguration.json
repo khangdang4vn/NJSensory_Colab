@@ -6,8 +6,8 @@
   "CredentialsProvider": {
     "CognitoIdentity": {
       "Default": {
-        "PoolId": "us-east-2:acd7d7c3-cd9c-4a23-9c8c-160b075acff4",
-        "Region": "us-east-2"
+        "PoolId": "us-east-1:a87219b3-2bef-4e8d-b2e1-fccaab0b9ff9",
+        "Region": "us-east-1"
       }
     }
   },
@@ -29,8 +29,8 @@
   },
   "S3DataUploadTestUtility": {
     "Default": {
-      "Bucket": "new-data-collection-test",
-      "Region": "us-east-2"
+      "Bucket": "new-data-collection-xj8",
+      "Region": "us-east-1"
     }
   }
 }
