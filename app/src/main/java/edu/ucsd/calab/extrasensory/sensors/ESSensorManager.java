@@ -1585,9 +1585,9 @@ public class ESSensorManager extends Context
         Log.i(LOG_TAG, "Created zip file: " + zipFilename);
 
         // Add this zip file to the network queue:
-        if (zipFilename != null) {
-            ESNetworkAccessor.getESNetworkAccessor().addToUploadQueue(zipFilename);
-        }
+//        if (zipFilename != null) {
+//            ESNetworkAccessor.getESNetworkAccessor().addToUploadQueue(zipFilename);
+//        }
         _esApplication.set_userSelectedDataCollectionOn(false);
     }
 
