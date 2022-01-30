@@ -67,9 +67,9 @@ public abstract class BaseCBActivity extends Activity {
             case R.id.app_home:
                 startActivity(new Intent(BaseCBActivity.this, ConversationBackupActivity.class));
                 return true;
-          /*  case R.id.app_archives:
-                startActivity(new Intent(BaseCBActivity.this, ArchivesActivity.class));
-                return true;*/
+           // case R.id.app_archives:
+           //     startActivity(new Intent(BaseCBActivity.this, ArchivesActivity.class));
+           //     return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

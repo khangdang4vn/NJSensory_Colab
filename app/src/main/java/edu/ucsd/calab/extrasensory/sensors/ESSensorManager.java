@@ -81,7 +81,6 @@ import edu.ucsd.calab.extrasensory.data.ESLabelStruct;
 import edu.ucsd.calab.extrasensory.data.ESSettings;
 import edu.ucsd.calab.extrasensory.data.ESTimestamp;
 import edu.ucsd.calab.extrasensory.network.ESNetworkAccessor;
-import edu.ucsd.calab.extrasensory.sensors.AudioProcessing.ESAudioProcessor;
 import edu.ucsd.calab.extrasensory.sensors.polarandroidblesdk.PolarActivity;
 import edu.ucsd.calab.extrasensory.ui.FeedbackActivity;
 import edu.ucsd.calab.extrasensory.ui.HomeFragment;
@@ -339,7 +338,6 @@ public class ESSensorManager extends Context
     // Non static part:
     private final SensorManager _sensorManager;
     private final GoogleApiClient _googleApiClient;
-    private final ESAudioProcessor _audioProcessor;
     private final PolarActivity _polarProcessor;
     private final ESApplication _esApplication;
     private final HomeFragment _homefragment;
@@ -408,8 +406,6 @@ public class ESSensorManager extends Context
         _timestamp = new ESTimestamp(0);
         _sensorTypeToNiceName = new HashMap<>(10);
 
-        // Audio processor:
-        _audioProcessor = new ESAudioProcessor();
 
         // Polar processor:
         _polarProcessor = PolarActivity.getPolarProcessor();
@@ -1045,16 +1041,6 @@ public class ESSensorManager extends Context
             Log.d(LOG_TAG,"Not recording from Polar.");
         }
 
-        // Start recording audio:
-        if (ESSettings.shouldRecordAudio()) {
-            try {
-                _audioProcessor.startRecordingSession();
-            } catch (Exception exception) {
-                Log.e(LOG_TAG, "Failed to start audio recording session: " + exception.getMessage());
-            }
-        } else {
-            Log.d(LOG_TAG, "As requested: not recording audio.");
-        }
 
         // Start recording hi-frequency sensors:
         ArrayList<Integer> hfSensorTypesToRecord = ESSettings.highFreqSensorTypesToRecord();
@@ -1176,8 +1162,6 @@ public class ESSensorManager extends Context
         // Clear temporary data files:
         ESApplication.getTheAppContext().deleteFile(currentZipFilename());
 
-        // Clear audio data:
-        _audioProcessor.clearAudioData();
 
         // Clear Polar data:
         if (!clearBeforeStart && _polarProcessor.isPolarConnected()) {
@@ -1301,12 +1285,6 @@ public class ESSensorManager extends Context
         //LocationServices.FusedLocationApi.removeLocationUpdates(_googleApiClient,this);
         _googleApiClient.disconnect();
 
-        // Finish audio recording:
-        try {
-            _audioProcessor.stopRecordingSession(true);
-        } catch (Exception exception) {
-            Log.e(LOG_TAG, "Failed to stop audio recording session: " + exception.getMessage());
-        }
 
         // Finish Polar recording:
         HashMap<String, ArrayList<Integer>> polarhrMeasurements = null;
@@ -1585,9 +1563,9 @@ public class ESSensorManager extends Context
         Log.i(LOG_TAG, "Created zip file: " + zipFilename);
 
         // Add this zip file to the network queue:
-        if (zipFilename != null) {
-            ESNetworkAccessor.getESNetworkAccessor().addToUploadQueue(zipFilename);
-        }
+//        if (zipFilename != null) {
+//            ESNetworkAccessor.getESNetworkAccessor().addToUploadQueue(zipFilename);
+//        }
         _esApplication.set_userSelectedDataCollectionOn(false);
     }
 
@@ -1680,37 +1658,6 @@ public class ESSensorManager extends Context
             zos.putNextEntry(new ZipEntry(HIGH_FREQ_DATA_FILENAME));
             zos.write(highFreqDataStr.getBytes());
             zos.closeEntry();
-            // The MFCC file:
-            File mfccFile = _audioProcessor.getMFCCFile();
-            if (!mfccFile.exists()) {
-                Log.e(LOG_TAG, "data-zipping. MFCC file doesn't exist");
-            } else {
-                Log.i(LOG_TAG, "data-zipping. Adding MFCC file.");
-                FileInputStream fileInputStream = new FileInputStream(mfccFile);
-                byte[] buffer = new byte[2048];
-                zos.putNextEntry(new ZipEntry(ESAudioProcessor.MFCC_FILENAME));
-                int numBytes;
-                while ((numBytes = fileInputStream.read(buffer)) > 0) {
-                    //Log.d(LOG_TAG,"data-zipping. Reading " + numBytes + " from MFCC file to zip.");
-                    zos.write(buffer, 0, numBytes);
-                }
-                zos.closeEntry();
-            }
-            // The audio properties file:
-            File audioPropFile = _audioProcessor.getAudioPropertiesFile();
-            if (!audioPropFile.exists()) {
-                Log.e(LOG_TAG, "data-zipping. Audio properties file doesn't exist.");
-            } else {
-                Log.i(LOG_TAG, "data-zipping. Adding audio properties file.");
-                FileInputStream fileInputStream = new FileInputStream(audioPropFile);
-                byte[] buffer = new byte[2048];
-                zos.putNextEntry(new ZipEntry(ESAudioProcessor.AUDIO_PROPERTIES_FILENAME));
-                int numBytes;
-                while ((numBytes = fileInputStream.read(buffer)) > 0) {
-                    zos.write(buffer, 0, numBytes);
-                }
-                zos.closeEntry();
-            }
 
             // Close the zip:
             zos.close();

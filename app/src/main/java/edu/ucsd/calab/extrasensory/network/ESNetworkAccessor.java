@@ -9,8 +9,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -31,6 +33,10 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import static java.nio.file.StandardCopyOption.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -88,6 +94,7 @@ public class ESNetworkAccessor {
     public static final File downDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
     public static final File NJSensoryDir =  new File(downDir, "NJSensory");
     public static final File rawDir = new File(NJSensoryDir, "raw");
+    public static final File uploadedDir = new File(NJSensoryDir, "uploaded");
 
     private static final String LOG_TAG = "[ESNetworkAccessor]";
     private static final long WAIT_TIME_AFTER_UPLOAD_IN_MILLIS = 15000;
@@ -200,7 +207,11 @@ public class ESNetworkAccessor {
             }
             if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
                 Log.i(LOG_TAG,"received broadcast of WiFi connectivity change");
-                if (canWeUseNetworkNow()) {
+                NetworkInfo networkInfo =
+                        intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                NetworkInfo.State state = networkInfo.getState();
+                if (state == NetworkInfo.State.CONNECTED) {
+//                if (canWeUseNetworkNow()) {
                     Log.i(LOG_TAG,"We now have WiFi. Call upload and send from feedback queue");
 //                    uploadWhatYouHave();
                     new S3UploadAllDataTask().execute(rawDir);
@@ -228,7 +239,7 @@ public class ESNetworkAccessor {
         _uploadQueue = new ArrayList<String>(8);
         _feedbackQueue = new ESFeedbackQueue();
         ESApplication.getTheAppContext().registerReceiver(_broadcastReceiver,new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
-        checkZipFilesInDirectory();
+//        checkZipFilesInDirectory();
         checkFeedbackFilesInDirectory();
     }
 
@@ -375,47 +386,46 @@ public class ESNetworkAccessor {
         Log.d(LOG_TAG,"Feedback Queue: " + _feedbackQueue);
     }
 
-    private void checkZipFilesInDirectory() {
-//        File[] zipFiles = ESApplication.getZipDir().listFiles(new FilenameFilter() {
-//            @Override
-//            public boolean accept(File dir, String filename) {
-//                return filename.endsWith(".zip") || filename.endsWith(".ZIP");
+//    private void checkZipFilesInDirectory() {
+////        File[] zipFiles = ESApplication.getZipDir().listFiles(new FilenameFilter() {
+////            @Override
+////            public boolean accept(File dir, String filename) {
+////                return filename.endsWith(".zip") || filename.endsWith(".ZIP");
+////            }
+////        });
+//        try {
+//            File[] zipFiles = ESDataFilesAccessor.getLabelFilesDir().listFiles(new FilenameFilter() {
+//                @Override
+//                public boolean accept(File dir, String filename) {
+//                    return filename.endsWith(".zip") || filename.endsWith(".ZIP");
+//                }
+//            });
+//
+//            for (File file : zipFiles) {
+//                String filename = file.getName();
+//                addToUploadQueueWithoutUploadingYet(filename);
 //            }
-//        });
-        try {
-            File[] zipFiles = ESDataFilesAccessor.getLabelFilesDir().listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String filename) {
-                    return filename.endsWith(".zip") || filename.endsWith(".ZIP");
-                }
-            });
+//            uploadWhatYouHave();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            Log.e(LOG_TAG, "IOException when check zip files in directory");
+//        }
+//
+//    }
 
-            for (File file : zipFiles) {
-                String filename = file.getName();
-                addToUploadQueueWithoutUploadingYet(filename);
-            }
-
-            uploadWhatYouHave();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e(LOG_TAG, "IOException when check zip files in directory");
-        }
-
-    }
-
-    private void addToUploadQueueWithoutUploadingYet(String zipFileName) {
-        if (_uploadQueue.contains(zipFileName)) {
-            Log.e(LOG_TAG,"Network queue already contains zip file: " + zipFileName);
-            return;
-
-        }
-        Log.v(LOG_TAG, "Adding to network queue: " + zipFileName);
-        _uploadQueue.add(zipFileName);
-
-        // Send notification to other components:
-        Intent intent = new Intent(BROADCAST_NETWORK_QUEUE_SIZE_CHANGED);
-        LocalBroadcastManager.getInstance(ESApplication.getTheAppContext()).sendBroadcast(intent);
-    }
+//    private void addToUploadQueueWithoutUploadingYet(String zipFileName) {
+//        if (_uploadQueue.contains(zipFileName)) {
+//            Log.e(LOG_TAG,"Network queue already contains zip file: " + zipFileName);
+//            return;
+//
+//        }
+//        Log.v(LOG_TAG, "Adding to network queue: " + zipFileName);
+//        _uploadQueue.add(zipFileName);
+//
+//        // Send notification to other components:
+//        Intent intent = new Intent(BROADCAST_NETWORK_QUEUE_SIZE_CHANGED);
+//        LocalBroadcastManager.getInstance(ESApplication.getTheAppContext()).sendBroadcast(intent);
+//    }
 
     /**
      *
@@ -423,13 +433,13 @@ public class ESNetworkAccessor {
      *
      * @param zipFileName The path of the zip file to upload
      */
-    public void addToUploadQueue(String zipFileName) {
-        addToUploadQueueWithoutUploadingYet(zipFileName);
-        // If we stored enough, we can start uploading sequence:
-        if (_uploadQueue.size() > ESSettings.numExamplesStoreBeforeSend()) {
-            uploadWhatYouHave();
-        }
-    }
+//    public void addToUploadQueue(String zipFileName) {
+//        addToUploadQueueWithoutUploadingYet(zipFileName);
+//        // If we stored enough, we can start uploading sequence:
+//        if (_uploadQueue.size() > ESSettings.numExamplesStoreBeforeSend()) {
+//            uploadWhatYouHave();
+//        }
+//    }
 
     private void deleteZipFileAndRemoveFromUploadQueue(String zipFileName) {
         _uploadQueue.remove(zipFileName);
@@ -446,49 +456,49 @@ public class ESNetworkAccessor {
         LocalBroadcastManager.getInstance(ESApplication.getTheAppContext()).sendBroadcast(intent);
     }
 
-    public void uploadWhatYouHave() {
-        Log.v(LOG_TAG,"uploadWhatYouHave() was called.");
-
-        if (_uploadQueue.size() <= 0) {
-            Log.v(LOG_TAG, "Nothing to upload (queue is empty).");
-            return;
-        }
-        // Check if there is WiFi connectivity:
-        if (!canWeUseNetworkNow()) {
-            Log.i(LOG_TAG,"There is no WiFi right now. Not uploading.");
-            return;
-        }
-
-        // Check if busy:
-        long nowInMillis = new Date().getTime();
-        if (nowInMillis < _busyUntilTimeInMillis) {
-            Log.i(LOG_TAG,"Network is busy");
-            return;
-        }
-        // Set the "busy until" sign:
-        _busyUntilTimeInMillis = nowInMillis + WAIT_TIME_AFTER_UPLOAD_IN_MILLIS;
-
-//        while (_uploadQueue.size() > 0) {
-//             Get the next zip to handle:
-            String nextZip = _uploadQueue.remove(0);
-
-            // Keep it at the end of the queue (until getting response):
-            _uploadQueue.add(nextZip);
-
-            Log.v(LOG_TAG, "Popped zip from queue: " + nextZip);
-            Log.v(LOG_TAG, "Now queue has: " + _uploadQueue);
-
-            // do the S3 upload here
-            new S3UploadDataTask().execute(nextZip);
-            Log.v(LOG_TAG, "Upload is enabled");
+//    public void uploadWhatYouHave() {
+//        Log.v(LOG_TAG,"uploadWhatYouHave() was called.");
+//
+//        if (_uploadQueue.size() <= 0) {
+//            Log.v(LOG_TAG, "Nothing to upload (queue is empty).");
+//            return;
 //        }
-//        // Send the next zip:
-//        ESApiHandler.ESApiParams params = new ESApiHandler.ESApiParams(
-//                ESApiHandler.API_TYPE.API_TYPE_UPLOAD_ZIP,nextZip,null,this);
-//        Log.d(LOG_TAG,"Created api params: " + params);
-//        ESApiHandler api = new ESApiHandler();
-//        api.execute(params);
-    }
+//        // Check if there is WiFi connectivity:
+//        if (!canWeUseNetworkNow()) {
+//            Log.i(LOG_TAG,"There is no WiFi right now. Not uploading.");
+//            return;
+//        }
+//
+//        // Check if busy:
+//        long nowInMillis = new Date().getTime();
+//        if (nowInMillis < _busyUntilTimeInMillis) {
+//            Log.i(LOG_TAG,"Network is busy");
+//            return;
+//        }
+//        // Set the "busy until" sign:
+//        _busyUntilTimeInMillis = nowInMillis + WAIT_TIME_AFTER_UPLOAD_IN_MILLIS;
+//
+////        while (_uploadQueue.size() > 0) {
+////             Get the next zip to handle:
+//            String nextZip = _uploadQueue.remove(0);
+//
+//            // Keep it at the end of the queue (until getting response):
+//            _uploadQueue.add(nextZip);
+//
+//            Log.v(LOG_TAG, "Popped zip from queue: " + nextZip);
+//            Log.v(LOG_TAG, "Now queue has: " + _uploadQueue);
+//
+//            // do the S3 upload here
+//            new S3UploadDataTask().execute(nextZip);
+//            Log.v(LOG_TAG, "Upload is enabled");
+////        }
+////        // Send the next zip:
+////        ESApiHandler.ESApiParams params = new ESApiHandler.ESApiParams(
+////                ESApiHandler.API_TYPE.API_TYPE_UPLOAD_ZIP,nextZip,null,this);
+////        Log.d(LOG_TAG,"Created api params: " + params);
+////        ESApiHandler api = new ESApiHandler();
+////        api.execute(params);
+//    }
 
     public boolean canWeUseNetworkNow() {
         if (!ESSettings.isCellularAllowed()) {
@@ -496,7 +506,7 @@ public class ESNetworkAccessor {
             return isThereWiFiConnectivity();
         }
 
-        // Then allowed to use either wifi or cellular:
+//         Then allowed to use either wifi or cellular:
         return isThereWiFiConnectivity() || isThereMobileConnectivity();
     }
 
@@ -541,7 +551,7 @@ public class ESNetworkAccessor {
         // First, check if the activity still has a zip file waiting to be sent to the server:
         String relevantZipFilename = ESSensorManager.getZipFilename(activity.get_timestamp());
         if (_uploadQueue.indexOf(relevantZipFilename) >= 0) {
-            Log.i(LOG_TAG,"Instance " + activity.get_timestamp() + " has zip file waiting to be sent, so not adding feedback file for it now. It should be added later when zip will be sent.");
+            Log.i(LOG_TAG,"Instance " + activity.get_timestamp() + " has zip file waiting to be sent, so not adding feedback file for it now. It should be added later wYour locationhen zip will be sent.");
             return;
         }
 
@@ -613,7 +623,7 @@ public class ESNetworkAccessor {
 
     private void markNetworkIsNotBusy() {
         this._busyUntilTimeInMillis = 0;
-        uploadWhatYouHave();
+//        uploadWhatYouHave();
 //        new S3UploadAllDataTask().execute(rawDir);
 
     }
@@ -646,59 +656,61 @@ public class ESNetworkAccessor {
     // Async tasks
     //=======================================================================================
 
-    private static class S3UploadDataTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected void onPreExecute() {
-            Log.v(LOG_TAG, "Start S3UploadDataTask");
-            super.onPreExecute();
-        }
+//    private static class S3UploadDataTask extends AsyncTask<String, Void, String> {
+//        @Override
+//        protected void onPreExecute() {
+//            Log.v(LOG_TAG, "Start S3UploadDataTask");
+//            super.onPreExecute();
+//        }
+//
+//        @Override
+//        protected String doInBackground(String... params) {
+//            // Get context
+//            Context context = ESApplication.getTheAppContext();
+//            // Load data
+//            String zipFilename = params[0];
+////            File zipFile = new File(ESApplication.getZipDir(), zipFilename);
+//            File zipFile = null;
+//            try {
+//                zipFile = new File(ESDataFilesAccessor.getLabelFilesDir(), zipFilename);
+//                if (!zipFile.exists()) {
+//                    Log.e(LOG_TAG,"Zip file doesn't exist: " + zipFilename);
+//                    return zipFilename;
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                Log.e(LOG_TAG, "IOException when finding zip file");
+//            }
+//
+//            // prepare S3 client
+//            AWSUtil util = new AWSUtil();
+//            String bucket = util.getBucket(context);
+//            AmazonS3Client s3Client = util.getS3ClientDataUpload(context);
+//            try {
+//                s3Client.putObject(new PutObjectRequest(bucket, zipFilename, zipFile));
+//            } catch (Exception e) {
+//                Log.e(LOG_TAG, "Error when uploading data zip to s3");
+//                e.printStackTrace();
+//            }
+//            Log.v(LOG_TAG, "Data Uploaded to S3");
+//            return zipFilename;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String zipFilename) {
+//            super.onPostExecute(zipFilename);
+//            // Since zip uploaded successfully, can remove it from network queue and delete the file:
+//            ESNetworkAccessor.getESNetworkAccessor().deleteZipFileAndRemoveFromUploadQueue(zipFilename);
+//            Log.v(LOG_TAG, "File name removed from upload queue");
+//        }
+//    }
 
-        @Override
-        protected String doInBackground(String... params) {
-            // Get context
-            Context context = ESApplication.getTheAppContext();
-            // Load data
-            String zipFilename = params[0];
-//            File zipFile = new File(ESApplication.getZipDir(), zipFilename);
-            File zipFile = null;
-            try {
-                zipFile = new File(ESDataFilesAccessor.getLabelFilesDir(), zipFilename);
-                if (!zipFile.exists()) {
-                    Log.e(LOG_TAG,"Zip file doesn't exist: " + zipFilename);
-                    return zipFilename;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e(LOG_TAG, "IOException when finding zip file");
-            }
-
-            // prepare S3 client
-            AWSUtil util = new AWSUtil();
-            String bucket = util.getBucket(context);
-            AmazonS3Client s3Client = util.getS3ClientDataUpload(context);
-            try {
-                s3Client.putObject(new PutObjectRequest(bucket, zipFilename, zipFile));
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "Error when uploading data zip to s3");
-                e.printStackTrace();
-            }
-            Log.v(LOG_TAG, "Data Uploaded to S3");
-            return zipFilename;
-        }
-
-        @Override
-        protected void onPostExecute(String zipFilename) {
-            super.onPostExecute(zipFilename);
-            // Since zip uploaded successfully, can remove it from network queue and delete the file:
-            ESNetworkAccessor.getESNetworkAccessor().deleteZipFileAndRemoveFromUploadQueue(zipFilename);
-            Log.v(LOG_TAG, "File name removed from upload queue");
-        }
-    }
-
-    private static void uploadDirectory2S3(File folder) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void uploadDirectory2S3(File folder) {
         Context context = ESApplication.getTheAppContext();
         System.out.println(folder.getAbsolutePath());
-        for (File zipFile : folder.listFiles()) {
+        if(folder.listFiles() != null) {
+            for (File zipFile : folder.listFiles()) {
 //                File zipFile = null;
 //                try {
 //                    zipFile = new File(ESDataFilesAccessor.getLabelFilesDir(), zipFilename);
@@ -710,42 +722,62 @@ public class ESNetworkAccessor {
 //                    e.printStackTrace();
 //                    Log.e(LOG_TAG, "IOException when finding zip file");
 //                }
-            if (zipFile.isDirectory()) {
-                uploadDirectory2S3(zipFile);
-            }
-            else {
-                String zipFilename = zipFile.getName();
-                // prepare S3 client
-                AWSUtil util = new AWSUtil();
-                String bucket = util.getBucket(context);
-                AmazonS3Client s3Client = util.getS3ClientDataUpload(context);
-                try {
-                    s3Client.putObject(new PutObjectRequest(bucket, zipFilename, zipFile));
-                } catch (Exception e) {
-                    Log.e(LOG_TAG, "Error when uploading data zip to s3");
-                    e.printStackTrace();
+                if (zipFile.isDirectory()) {
+                    uploadDirectory2S3(zipFile);
+                } else {
+                    String zipFilename = zipFile.getName();
+                    // prepare S3 client
+                    String orgPath = zipFile.getAbsolutePath();
+                    String tgtPath = uploadedDir.getAbsolutePath() + "/" + zipFilename;
+
+                    AWSUtil util = new AWSUtil();
+                    String bucket = util.getBucket(context);
+                    AmazonS3Client s3Client = util.getS3ClientDataUpload(context);
+                    try {
+                        s3Client.putObject(new PutObjectRequest(bucket, zipFilename, zipFile));
+                        Log.v(LOG_TAG, "Data Uploaded to S3");
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Error when uploading data zip to s3");
+                        e.printStackTrace();
+                    }
+//                ESNetworkAccessor.getESNetworkAccessor().deleteZipFileAndRemoveFromUploadQueue(zipFilename);
+                    try {
+                        Path temp = Files.move
+                                (Paths.get(orgPath),
+                                        Paths.get(tgtPath), REPLACE_EXISTING);
+                        Log.v(LOG_TAG, "File moved to uploaded dir.");
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Error when moving data to uploaded dir.");
+                        e.printStackTrace();
+                    }
                 }
-                Log.v(LOG_TAG, "Data Uploaded to S3");
-                ESNetworkAccessor.getESNetworkAccessor().deleteZipFileAndRemoveFromUploadQueue(zipFilename);
-                Log.v(LOG_TAG, "File name removed from upload queue");
             }
         }
     }
 
-    private static class S3UploadAllDataTask extends AsyncTask<File, Void, Void> {
+    public static class S3UploadAllDataTask extends AsyncTask<File, Void, Void> {
         @Override
         protected void onPreExecute() {
             Log.v(LOG_TAG, "Start S3UploadDataTask");
             super.onPreExecute();
+            if (!rawDir.exists()){
+                rawDir.mkdir();
+            }
+            if (!uploadedDir.exists()){
+                uploadedDir.mkdir();
+            }
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         protected Void doInBackground(File... params) {
             // Get context
             // Load data
             File folder = params[0];
 //            File zipFile = new File(ESApplication.getZipDir(), zipFilename);
-            uploadDirectory2S3(folder);
+
+                uploadDirectory2S3(folder);
+
             return null;
         }
 

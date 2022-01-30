@@ -68,7 +68,7 @@ public class ArchivesActivity extends BaseCBActivity {
         deleteButton.setOnClickListener(view -> {if(listView.getCheckedItemCount() > 0) showDialog(dfDelete);});
 
         listAdapter = new ArrayAdapter<ListEntity>(this, R.layout.archives_list_item);
-        //loadListAdapter();
+        loadListAdapter();
 
         listView = (ListView)findViewById(R.id.archives_list);
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
@@ -80,7 +80,7 @@ public class ArchivesActivity extends BaseCBActivity {
     @Override
     public void onResume() {
         super.onResume();
-        //loadListAdapter();
+        loadListAdapter();
         listView.clearChoices();
     }
 
@@ -135,6 +135,7 @@ public class ArchivesActivity extends BaseCBActivity {
         loadListAdapter();
         listView.clearChoices();
     }
+
     private void loadListAdapter() {
         listAdapter.clear();
         // look at all files in the directory, and add them to the list
@@ -146,4 +147,5 @@ public class ArchivesActivity extends BaseCBActivity {
         }
         listAdapter.notifyDataSetChanged();
     }
+
 }

@@ -204,7 +204,7 @@ public class Helper {
                 PART_MSG_ID = "mid", // Telephony.Mms.Part.MSG_ID
                 PART_CONTENT_LOCATION = "cl", // Telephony.Mms.Part.CONTENT_LOCATION
                 PART_NAME = "name", // Telephony.Mms.Part.NAME
-                PART_TEXT = "text", // Telephony.Mms.Part.TEXT
+                //PART_TEXT = "text", // Telephony.Mms.Part.TEXT
                 PART_FILENAME = "fn", // Telephony.Mms.Part.FILENAME
                 PART_SEQ = "seq", // Telephony.Mms.Part.SEQ
                 PART_CONTENT_TYPE = "ct", // Telephony.Mms.Part.CONTENT_TYPE
@@ -320,7 +320,7 @@ public class Helper {
     static class Ms extends Ho {
         // static final String[] FIELDS = new String[] {"timestamp", "number", "id", "text",
         // "subject", "mms"};
-        public String text;
+        //public String text;
         public String subject;
         public boolean mms;
         public boolean sender;
@@ -330,7 +330,7 @@ public class Helper {
         public JSONObject toJSON() throws Exception {
             // new JSONObject(this, FIELDS)
             JSONObject jobj = super.toJSON();
-            jobj.put("text", text);
+            //jobj.put("text", text);
             jobj.put("subject", subject);
             jobj.put("mms", mms);
             jobj.put("sender", sender);
@@ -353,7 +353,7 @@ public class Helper {
         public JSONObject toJSON() throws Exception {
             // new JSONObject(this, FIELDS)
             JSONObject jobj = new JSONObject();
-            jobj.put("text", text);
+            //jobj.put("text", text);
             jobj.put("filename", filename);
             return jobj;
         }
@@ -533,7 +533,7 @@ public class Helper {
         // prior to KitKat, permissions were required to access external storage.
         // Also, the method Environment.getExternalStorageState is only available from LOLLIPOP.
         // So: we check to use external dir only from LOLLIPOP and up.
-        if(PREFER_EXTERNAL_DIR) {
+        if(PREFER_EXTERNAL_DIR && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             File xd = ctx.getExternalFilesDir(null);
             // Log.d(TAG, ">>>>>>>>>>>>>>>>> build version > lollipop: " + Build.VERSION.SDK_INT +
             //         ", external storage state: " + Environment.getExternalStorageState(xd));

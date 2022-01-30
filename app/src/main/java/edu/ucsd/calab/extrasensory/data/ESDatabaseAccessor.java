@@ -709,12 +709,12 @@ public class ESDatabaseAccessor {
                 sendFeedback);
 
         // Write the user-provided labels to file that will be accessible to other apps:
-        if (ESSettings.saveUserLabelsFiles()) {
+        //if (ESSettings.saveUserLabelsFiles()) {
             ESDataFilesAccessor.writeUserReportedLabels(activity.get_timestamp(),mainActivityUserCorrection,secondaryActivities,moods);
-        }
-        else {
-            Log.d(LOG_TAG,"Requested to not save prediction files, so not saving.");
-        }
+      //  }
+       // else {
+      //      Log.d(LOG_TAG,"Requested to not save prediction files, so not saving.");
+      //  }
     }
 
     /**

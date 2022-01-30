@@ -188,34 +188,33 @@ public class ConversationBackupActivity extends BaseCBActivity {
         }
         setContentView(R.layout.main);
 
-        //specNumBackupEditView = (EditText) findViewById(R.id.specific_numbers_to_backup_edit);
+        specNumBackupEditView = (EditText) findViewById(R.id.specific_numbers_to_backup_edit);
         exitAppButton = (Button) findViewById(R.id.exit_app);
         Button processButton = (Button) findViewById(R.id.confirm);
         processButton.setOnClickListener(view -> showDialog(dfProcess));
 
-     /*   final Button selectContactButton = (Button) findViewById(R.id.select_contact);
+        final Button selectContactButton = (Button) findViewById(R.id.select_contact);
         selectContactButton.setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
             startActivityForResult(intent, Helper.SELECT_CONTACT_REQUEST);
-        });*/
+        });
 
-  /*      resetState(sharedPreferences, R.id.backup_all_numbers, "backup_all_numbers", false);
+        resetState(sharedPreferences, R.id.backup_all_numbers, "backup_all_numbers", false);
         resetState(sharedPreferences, R.id.backup_messages, "backup_messages", true);
-        resetState(sharedPreferences, R.id.backup_mms_attachments, "backup_mms_attachments", true);
         resetState(sharedPreferences, R.id.backup_call_records, "backup_call_records", true);
         resetState(sharedPreferences, R.id.delete_after_backup, "delete_after_backup", false);
         resetState(sharedPreferences, R.id.share_archive, "share_archive", true);
         resetState(sharedPreferences, R.id.random_question, "random_question", true);
         resetState(sharedPreferences, R.id.specific_numbers_to_backup_edit, "specific_numbers_to_backup_edit", false);
-*/
-    //    final CheckBox backupAllCB = (CheckBox) findViewById(R.id.backup_all_numbers);
+
+        final CheckBox backupAllCB = (CheckBox) findViewById(R.id.backup_all_numbers);
         final EditText specNumBackupEditView2 = specNumBackupEditView;
-    //    specNumBackupEditView.setEnabled(backupAllCB.isChecked());
-      /*  selectContactButton.setEnabled(!backupAllCB.isChecked());
+        specNumBackupEditView.setEnabled(!backupAllCB.isChecked());
+        selectContactButton.setEnabled(!backupAllCB.isChecked());
         backupAllCB.setOnClickListener(view -> {
             specNumBackupEditView2.setEnabled(!backupAllCB.isChecked());
             selectContactButton.setEnabled(!backupAllCB.isChecked());
-        });*/
+        });
 
         registerReceiver(progressReceiver, Helper.PROGRESS_INTENT_FILTER);
     }
@@ -391,14 +390,13 @@ public class ConversationBackupActivity extends BaseCBActivity {
         SharedPreferences sharedPreferences = Helper.getPreferences(this);
         // getSharedPreferences(Helper.SHARED_PREFERENCES_KEY, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-      /*  savePrefs(editor, R.id.backup_all_numbers, "backup_all_numbers");
+        savePrefs(editor, R.id.backup_all_numbers, "backup_all_numbers");
         savePrefs(editor, R.id.backup_messages, "backup_messages");
-        savePrefs(editor, R.id.backup_mms_attachments, "backup_mms_attachments");
         savePrefs(editor, R.id.backup_call_records, "backup_call_records");
         savePrefs(editor, R.id.delete_after_backup, "delete_after_backup");
         savePrefs(editor, R.id.share_archive, "share_archive");
         savePrefs(editor, R.id.random_question, "random_question");
-        savePrefs(editor, R.id.specific_numbers_to_backup_edit, "specific_numbers_to_backup_edit");*/
+        savePrefs(editor, R.id.specific_numbers_to_backup_edit, "specific_numbers_to_backup_edit");
         editor.commit();
 
         rperms = new Perms();

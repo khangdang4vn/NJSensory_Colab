@@ -275,7 +275,7 @@ public class ProcessingService extends IntentService {
                     sms.id = cur.getLong(cur.getColumnIndex(Helper.Cols.ID));
                     sms.timestamp = cur.getLong(cur.getColumnIndex(Helper.Cols.DATE));
                     sms.number = cur.getString(cur.getColumnIndex(Helper.Cols.ADDRESS));
-                    sms.text = cur.getString(cur.getColumnIndex(Helper.Cols.BODY));
+                    //sms.text = cur.getString(cur.getColumnIndex(Helper.Cols.BODY));
                     sms.subject = cur.getString(cur.getColumnIndex(Helper.Cols.SUBJECT));
                     // sms.mms =
                     // cur.getString(cur.getColumnIndex(Helper.Cols.TYPE_DISCRIMINATOR_COLUMN)).equals("mms");
@@ -289,7 +289,7 @@ public class ProcessingService extends IntentService {
                     Log.d(TAG, String.format("MS Info: Number: %s, Name: %s", sms.number, sms.name));
                     if (sms.mms) {
                         sms.timestamp = sms.timestamp * 1000; // mms timestamp is in seconds
-                        Log.d(TAG, "Found mms: #: " + sms.number + ", text: " + sms.text + ", id: " + sms.id);
+                        Log.d(TAG, "Found mms: #: " + sms.number + ", id: " + sms.id);
                         // Helper.Cols.ADDR_MSG_ID + " = " + sms.id + " AND " +
                         whereClause =
                                 (Helper.Cols.ADDR_TYPE
@@ -342,7 +342,7 @@ public class ProcessingService extends IntentService {
                                                         Helper.Cols.PART_FILENAME,
                                                         Helper.Cols.PART_NAME,
                                                         Helper.Cols.PART_SEQ,
-                                                        Helper.Cols.PART_TEXT,
+                                                        //Helper.Cols.PART_TEXT,
                                                         Helper.Cols.PART_CONTENT_TYPE,
                                                         Helper.Cols.PART_CONTENT_LOCATION
                                                 },
@@ -354,7 +354,7 @@ public class ProcessingService extends IntentService {
                             byte[] buffer = new byte[256];
                             do {
                                 MmsEntry mmse = new MmsEntry();
-                                mmse.text = curpart.getString(curpart.getColumnIndex(Helper.Cols.PART_TEXT));
+                                //mmse.text = curpart.getString(curpart.getColumnIndex(Helper.Cols.PART_TEXT));
                                 // if text matches <smil> ... </smil>, skip it
                                 if (mmse.text != null && Helper.SMIL_PATTERN.matcher(mmse.text).matches()) continue;
                                 mms.entries.add(mmse);
@@ -403,14 +403,14 @@ public class ProcessingService extends IntentService {
                         curpart.close();
 
                         // now check if text is blank and there's any text field, and set value
-                        if (mms.text == null || mms.text.trim().length() == 0) {
+                     /*   if (mms.text == null || mms.text.trim().length() == 0) {
                             for (MmsEntry mmsee : mms.entries) {
                                 if (mmsee.text != null && mmsee.text.trim().length() > 0) {
                                     mms.text = mmsee.text;
                                     break;
                                 }
                             }
-                        }
+                        }*/
                     }
                 }
                 updateProgress(

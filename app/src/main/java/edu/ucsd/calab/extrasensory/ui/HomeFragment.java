@@ -55,8 +55,8 @@ public class HomeFragment extends BaseTabFragment {
     }
 
     private RadioGroup _dataCollectionRadioGroup = null;
-    private TextView _storedExamplesCount = null;
-    private TextView _feedbackQueueCount = null;
+//    private TextView _storedExamplesCount = null;
+//    private TextView _feedbackQueueCount = null;
 
     @SuppressLint("NonConstantResourceId")
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -88,11 +88,11 @@ public class HomeFragment extends BaseTabFragment {
         ImageView _armbandIcon = homeView.findViewById(R.id.imagebutton_armband_icon);
         _armbandIcon.setOnClickListener(v -> startActivity(new Intent(Objects.requireNonNull(getActivity()).getApplicationContext(), PolarActivity.class)));
 
-        _storedExamplesCount = homeView.findViewById(R.id.text_zip_file_count);
-        presentNumStoredExamples();
-
-        _feedbackQueueCount = homeView.findViewById(R.id.text_feedback_count);
-        presentFeedbackQueueCount();
+//        _storedExamplesCount = homeView.findViewById(R.id.text_zip_file_count);
+//        presentNumStoredExamples();
+//
+//        _feedbackQueueCount = homeView.findViewById(R.id.text_feedback_count);
+//        presentFeedbackQueueCount();
 
         Button _sendStoredExamplesButton = homeView.findViewById(R.id.button_send_stored_examples);
         _sendStoredExamplesButton.setOnClickListener(v -> {
@@ -110,21 +110,23 @@ public class HomeFragment extends BaseTabFragment {
                 return;
             }
             // If we can use network to send the data, go for it:
-            ESNetworkAccessor.getESNetworkAccessor().uploadWhatYouHave();
+//            ESNetworkAccessor.getESNetworkAccessor().uploadWhatYouHave();
+//                ESNetworkAccessor.getESNetworkAccessor().uploadDirectory2S3(ESNetworkAccessor.rawDir);
+            new ESNetworkAccessor.S3UploadAllDataTask().execute(ESNetworkAccessor.rawDir);
         });
 
         return homeView;
     }
 
-    private void presentNumStoredExamples() {
-        int num = ESNetworkAccessor.getESNetworkAccessor().uploadQueueSize();
-        _storedExamplesCount.setText("" + num);
-    }
-
-    private void presentFeedbackQueueCount() {
-        int num = ESNetworkAccessor.getESNetworkAccessor().feedbackQueueSize();
-        _feedbackQueueCount.setText("" + num);
-    }
+//    private void presentNumStoredExamples() {
+//        int num = ESNetworkAccessor.getESNetworkAccessor().uploadQueueSize();
+//        _storedExamplesCount.setText("" + num);
+//    }
+//
+//    private void presentFeedbackQueueCount() {
+//        int num = ESNetworkAccessor.getESNetworkAccessor().feedbackQueueSize();
+//        _feedbackQueueCount.setText("" + num);
+//    }
  /*   @Override
     public void onPause() {
         super.onPause();
@@ -172,15 +174,15 @@ public class HomeFragment extends BaseTabFragment {
         //TODO: redraw the relevant image to the latest activity
     }
 
-    @Override
-    protected void reactToNetworkQueueSizeChangedEvent() {
-        super.reactToNetworkQueueSizeChangedEvent();
-        presentNumStoredExamples();
-    }
-
-    @Override
-    protected void reactToFeedbackQueueSizeChangedEvent() {
-        super.reactToFeedbackQueueSizeChangedEvent();
-        presentFeedbackQueueCount();
-    }
+//    @Override
+//    protected void reactToNetworkQueueSizeChangedEvent() {
+//        super.reactToNetworkQueueSizeChangedEvent();
+//        presentNumStoredExamples();
+//    }
+//
+//    @Override
+//    protected void reactToFeedbackQueueSizeChangedEvent() {
+//        super.reactToFeedbackQueueSizeChangedEvent();
+//        presentFeedbackQueueCount();
+//    }
 }
