@@ -42,7 +42,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -67,17 +66,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import edu.ucsd.calab.extrasensory.ESApplication;
-import edu.ucsd.calab.extrasensory.R;
 import edu.ucsd.calab.extrasensory.data.ESDataFilesAccessor;
-import edu.ucsd.calab.extrasensory.data.ESLabelStruct;
 import edu.ucsd.calab.extrasensory.data.ESSettings;
 import edu.ucsd.calab.extrasensory.data.ESTimestamp;
 import edu.ucsd.calab.extrasensory.network.ESNetworkAccessor;
@@ -114,6 +113,9 @@ public class ESSensorManager extends Context
     private static final int LOW_FREQ_SAMPLE_PERIOD_MICROSECONDS = 1000000;
     private static final int SAMPLE_PERIOD_MICROSECONDS = 25000;
     private static int validForHowManyMinutespublic;
+    private static String mainActivitypublic;
+    private static String[] secondaryActivitypublic;
+    private static String[] moodpublic;
     private final int NUM_SAMPLES_IN_SESSION = 1800;
     private static final double NANOSECONDS_IN_SECOND = 1e9f;
     private static final double NANOSECONDS_IN_MILLISECOND = 1e6f;
@@ -121,7 +123,7 @@ public class ESSensorManager extends Context
     private static final long LOCATION_UPDATE_INTERVAL_MILLIS = 500;
     private static final long LOCATION_FASTEST_UPDATE_INTERVAL_MILLIS = 50;
     private static final float LOCATION_BUBBLE_RADIUS_METERS = 500.0f;
-    private static final String HIGH_FREQ_DATA_FILENAME = "HF_DUR_DATA.txt";
+    private static final String HIGH_FREQ_DATA_FILENAME = ".json";
     private static final int MAX_TIME_RECORDING_IN_SECONDS = 20000;// ESApplication.validForHowManyMinutespublic - 30;
 
     // Raw motion sensors:
@@ -375,6 +377,15 @@ public class ESSensorManager extends Context
 
     public static void getForHowManyMinutes(int validForHowManyMinutes) {
         validForHowManyMinutespublic = validForHowManyMinutes;
+    }
+    public static void getMainActivity(String mainActivity) {
+        mainActivitypublic = mainActivity;
+    }
+    public static void getSecondaryActivity(String[] secondaryActivity) {
+        secondaryActivitypublic = secondaryActivity;
+    }
+    public static void getMood(String[] mood) {
+        moodpublic = mood;
     }
 
     private void set_recordingRightNow(boolean recordingRightNow) {
@@ -1340,6 +1351,25 @@ public class ESSensorManager extends Context
         // Construct an object with all the data:
         JSONObject data = new JSONObject();
 
+        // Add label
+        Set<String> labels;
+        labels = ESDataFilesAccessor.writeUserLabels(
+                mainActivitypublic,secondaryActivitypublic,moodpublic);
+        data.put("labels", labels);
+
+        JSONArray labelsJsonArray = new JSONArray();
+        String[] userLabels = new String[labels.size()];
+        labels.toArray(userLabels);
+        for (String userLabel : userLabels) {
+            labelsJsonArray.put(userLabel);
+        }
+        try {
+            data.put("labels",labelsJsonArray);
+        }
+        catch (JSONException e) {
+            Log.e(LOG_TAG,"JSON: failed putting label " + ". Message: " + e.getMessage());
+        }
+
         // Add high-frequency data:
         for (String key : _highFreqData.keySet()) {
             JSONArray samples = new JSONArray(_highFreqData.get(key));
@@ -1349,7 +1379,6 @@ public class ESSensorManager extends Context
                 Log.e(LOG_TAG, "JSON: failed putting key " + key + ". Message: " + e.getMessage());
             }
         }
-
 
         // Add Polar data:
         if (polarhrMeasurements != null) {
@@ -1362,6 +1391,7 @@ public class ESSensorManager extends Context
                 Log.e(LOG_TAG,"JSON: failed putting polar hr key " + key + ". Message: " + e.getMessage());
             }
         }}
+
         /*    if (polaraccxMeasurements != null) {
             for (String key : polaraccxMeasurements.keySet()) {
                 JSONArray samples = new JSONArray(polaraccxMeasurements.get(key));
@@ -1559,8 +1589,8 @@ public class ESSensorManager extends Context
         writeFile(dataStr);
 
         // Zip the files:
-        String zipFilename = createZipFile(dataStr);
-        Log.i(LOG_TAG, "Created zip file: " + zipFilename);
+   //     String zipFilename = createZipFile(dataStr);
+   //     Log.i(LOG_TAG, "Created zip file: " + zipFilename);
 
         // Add this zip file to the network queue:
 //        if (zipFilename != null) {
@@ -1655,15 +1685,12 @@ public class ESSensorManager extends Context
 
             // Add the data files:
             // The high frequency measurements data:
-            zos.putNextEntry(new ZipEntry(HIGH_FREQ_DATA_FILENAME));
+            zos.putNextEntry(new ZipEntry(currentZipFilename()+HIGH_FREQ_DATA_FILENAME));
             zos.write(highFreqDataStr.getBytes());
             zos.closeEntry();
 
             // Close the zip:
             zos.close();
-        } catch (FileNotFoundException e) {
-            Log.e(LOG_TAG, e.getMessage());
-            return null;
         } catch (IOException e) {
             Log.e(LOG_TAG, e.getMessage());
             return null;
@@ -1672,22 +1699,17 @@ public class ESSensorManager extends Context
         return zipFilename;
     }
 
-    private boolean writeFile(String content) {
-        FileOutputStream fos = null;
+    private void writeFile(String content) {
+        FileOutputStream fos;
         try {
-            File outFile = new File(ESDataFilesAccessor.getLabelFilesDir(), ESSensorManager.HIGH_FREQ_DATA_FILENAME);
+            File outFile = new File(ESDataFilesAccessor.getLabelFilesDir(), currentZipFilename() + ESSensorManager.HIGH_FREQ_DATA_FILENAME);
             fos = new FileOutputStream(outFile);
             fos.write(content.getBytes());
             fos.close();
-        } catch (FileNotFoundException e) {
-            Log.e(LOG_TAG, e.getMessage());
-            return false;
         } catch (IOException e) {
             Log.e(LOG_TAG, e.getMessage());
-            return false;
         }
 
-        return true;
     }
 
     /**
@@ -1700,7 +1722,7 @@ public class ESSensorManager extends Context
     }
 
     public static String getZipFilename(ESTimestamp timestamp) {
-        return timestamp.toString() + "-" + ESSettings.uuid() + ".zip";
+        return timestamp.toString() + "-" + ESSettings.uuid();
     }
 
     private String currentZipFilename() {

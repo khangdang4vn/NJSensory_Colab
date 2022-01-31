@@ -77,8 +77,8 @@ public class MainActivity extends BaseActivity {
         // Add the tabs:
         _fragmentTabHost.addTab(_fragmentTabHost.newTabSpec(getString(R.string.tab_home_tag)).setIndicator(getString(R.string.tab_home_indicator)),
                 HomeFragment.class, null);
-        _fragmentTabHost.addTab(_fragmentTabHost.newTabSpec(getString(R.string.tab_history_tag)).setIndicator(getString(R.string.tab_history_indicator)),
-                HistoryFragment.class, null);
+        //_fragmentTabHost.addTab(_fragmentTabHost.newTabSpec(getString(R.string.tab_history_tag)).setIndicator(getString(R.string.tab_history_indicator)),
+         //       HistoryFragment.class, null);
         _fragmentTabHost.addTab(_fragmentTabHost.newTabSpec(getString(R.string.tab_summary_tag)).setIndicator(getString(R.string.tab_summary_indicator)),
                 SummaryFragment.class,null);
 

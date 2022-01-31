@@ -57,7 +57,7 @@ public class ESDataFilesAccessor {
             throw new IOException("External storage is not mounted.");
         }
 
-        File dataFilesDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "//NJSensory//raw//",LABEL_DATA_DIRNAME);
+        File dataFilesDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "//NJSensory//","raw");
 //        File dataFilesDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),LABEL_DATA_DIRNAME);
         if (!dataFilesDir.exists()) {
             // Create the directory:
@@ -219,5 +219,35 @@ public class ESDataFilesAccessor {
                 });
 
         return true;
+    }
+
+    /**
+     * Write the labels for an instance to a textual file that will be available to other apps.
+     * @param mainActivityUserCorrection - the main-activity labels, corrected by the user
+     * @param secondaryActivities - the secondary activities reported by the user
+     * @param moods - the mood labels provided by the user
+     * @return JSONArray
+     */
+    public static Set<String> writeUserLabels(String mainActivityUserCorrection, String[] secondaryActivities, String[] moods) {
+        // Prepare a set of reported labels (all combined together):
+        Set<String> userLabelsSet = new HashSet<>(10);
+        String dummyLabel = ESApplication.getTheAppContext().getString(R.string.not_sure_dummy_label);
+        if (mainActivityUserCorrection != null && !mainActivityUserCorrection.equals(dummyLabel)) {
+            userLabelsSet.add(mainActivityUserCorrection);
+        }
+        if (secondaryActivities != null) {
+            for (String secLabel : secondaryActivities) {
+                userLabelsSet.add(secLabel);
+            }
+        }
+        if (moods != null) {
+            for (String moodLabel : moods) {
+                userLabelsSet.add(moodLabel);
+            }
+        }
+        // Construct the JSON structure:
+        String[] userLabels = new String[userLabelsSet.size()];
+        userLabelsSet.toArray(userLabels);
+        return userLabelsSet;
     }
 }

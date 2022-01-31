@@ -399,6 +399,9 @@ public class FeedbackActivity extends BaseActivity {
                     ((ESApplication)getApplication()).startActiveFeedback(_labelStruct, _validForHowManyMinutes, initiatedByNotification,
                             _timestampOpenFeedbackForm, timestampPressSendButton, _parameters._timestampNotification , _parameters._timestampUserRespondToNotification);
                     ESSensorManager.getForHowManyMinutes(_validForHowManyMinutes);
+                    ESSensorManager.getMainActivity(_labelStruct._mainActivity);
+                    ESSensorManager.getSecondaryActivity(_labelStruct._secondaryActivities);
+                    ESSensorManager.getMood(_labelStruct._moods);
                     finish();
                     return;
                 }
