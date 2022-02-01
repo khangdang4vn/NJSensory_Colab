@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -21,6 +22,7 @@ import edu.ucsd.calab.extrasensory.data.ESContinuousActivity;
 import edu.ucsd.calab.extrasensory.data.ESDatabaseAccessor;
 import edu.ucsd.calab.extrasensory.data.ESTimestamp;
 import edu.ucsd.calab.extrasensory.sensors.ESSensorManager;
+import edu.ucsd.calab.extrasensory.sensors.polarandroidblesdk.PolarActivity;
 
 /**
  * This is the base for the UI classes:
@@ -125,6 +127,10 @@ public class BaseActivity extends AppCompatActivity {
         }
         if (ESSensorManager.getESSensorManager().is_recordingRightNow()) {
             redLight.setVisible(true);
+            if (PolarActivity.batterylevel < 5) {
+                Toast toast = Toast.makeText(this, "Your Polar device has a low battery level under 5%. Please charge.",Toast.LENGTH_SHORT);
+                toast.show();
+            }
             Log.i(LOG_TAG, "Recording now - turning on red light");
         }
         else {

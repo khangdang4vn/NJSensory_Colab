@@ -38,6 +38,7 @@ import io.reactivex.rxjava3.functions.BiFunction
 import io.reactivex.rxjava3.functions.Supplier
 import android.R.string
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable.*
 import io.reactivex.rxjava3.internal.util.NotificationLite.getValue
@@ -53,16 +54,20 @@ import android.view.Menu
 import androidx.core.content.ContextCompat.startActivity
 import edu.ucsd.calab.extrasensory.data.*
 import edu.ucsd.calab.extrasensory.sensors.ESSensorManager
+import edu.ucsd.calab.extrasensory.sensors.polarandroidblesdk.PolarActivity.Companion.isPolarConnected
 import edu.ucsd.calab.extrasensory.ui.BaseActivity
 import io.reactivex.rxjava3.subjects.ReplaySubject
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
+import kotlin.properties.Delegates
 
 
 class PolarActivity : BaseActivity() {
     companion object {
+        @kotlin.jvm.JvmField
+        var batterylevel: Int = 0
         var polarhrMeasurements = HashMap<String, ArrayList<Int>>()
         private const val TAG = "PolarActivity"
         private const val API_LOGGER_TAG = "API LOGGER"
@@ -118,7 +123,6 @@ class PolarActivity : BaseActivity() {
                     .subscribe(
                         { polarBroadcastData: PolarHrBroadcastData ->
                             polarhrList += polarBroadcastData.hr
-
                             Log.d(
                                 TAG,
                                 "HR BROADCAST ${polarBroadcastData.polarDeviceInfo.deviceId} " +
@@ -282,10 +286,10 @@ class PolarActivity : BaseActivity() {
                 bluetoothEnabled = powered
                 if (powered) {
                     enableAllButtons()
-                    showToast("Phone Bluetooth on")
+                    showToast("Phone Bluetooth is on")
                 } else {
                     disableAllButtons()
-                    showToast("Phone Bluetooth off")
+                    showToast("Phone Bluetooth is off")
 
                 }
             }
@@ -296,6 +300,7 @@ class PolarActivity : BaseActivity() {
                 deviceConnected = true
                 val buttonText = getString(R.string.disconnect_from_device, deviceId)
                 toggleButtonDown(connectButton, buttonText)
+                showToast("Your Polar device is connected")
             }
 
             override fun deviceConnecting(polarDeviceInfo: PolarDeviceInfo) {
@@ -308,6 +313,7 @@ class PolarActivity : BaseActivity() {
                 val buttonText = getString(R.string.connect_to_device, deviceId)
                 toggleButtonUp(connectButton, buttonText)
                 //toggleButtonUp(toggleSdkModeButton, R.string.enable_sdk_mode)
+                showToast("Your Polar device is disconnected")
             }
 
             override fun streamingFeaturesReady(
@@ -328,6 +334,11 @@ class PolarActivity : BaseActivity() {
             }
 
             override fun batteryLevelReceived(identifier: String, level: Int) {
+                batterylevel = level
+                if(level < 5){
+                    showToast("Your Polar device has a low battery level of $level%. Please charge.")
+                }
+                showToast("The battery level of your Polar device is $level%")
                 Log.d(TAG, "BATTERY LEVEL: $level")
             }
 
@@ -400,6 +411,10 @@ class PolarActivity : BaseActivity() {
                 if (autoConnectDisposable != null) {
                 autoConnectDisposable?.dispose()
             }
+                if((autoConnectDisposable == null) && (!deviceConnected)){
+                    showToast("Connecting to your Polar device")}
+                if((autoConnectDisposable != null) && (!deviceConnected)){
+                    showToast("Connecting to your Polar device")}
             autoConnectDisposable = api.autoConnectToDevice(-50, "180D", null)
                 .subscribe(
                     { Log.d(TAG, "auto connect search complete") },

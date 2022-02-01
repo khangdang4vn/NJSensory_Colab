@@ -95,6 +95,7 @@ public class ESNetworkAccessor {
     public static final File NJSensoryDir =  new File(downDir, "NJSensory");
     public static final File rawDir = new File(NJSensoryDir, "raw");
     public static final File uploadedDir = new File(NJSensoryDir, "uploaded");
+    public static final File combinedDir = new File(NJSensoryDir, "combined");
 
     private static final String LOG_TAG = "[ESNetworkAccessor]";
     private static final long WAIT_TIME_AFTER_UPLOAD_IN_MILLIS = 15000;
@@ -755,6 +756,42 @@ public class ESNetworkAccessor {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+  /*  public static void combineAll(File folder) {
+        JSONObject mergedJSON = new JSONObject();
+        System.out.println(folder.getAbsolutePath());
+        if(folder.listFiles() != null) {
+            for (File zipFile : folder.listFiles()) {
+                if (zipFile.isDirectory()) {
+                    combineAll(zipFile);
+                } else {
+                    String zipFilename = zipFile.getName();
+                    String orgPath = zipFile.getAbsolutePath();
+                    String tgtPath = combinedDir.getAbsolutePath() + "/" + zipFilename;
+                    try {
+                        mergedJSON = new JSONObject(zipFile, zipFile.getName());
+                        for (String key : JSONObject.getNames(json2)) {
+                            mergedJSON.put(key, json2.get(key));
+                        Log.v(LOG_TAG, "Data Combined");
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Error when combining data");
+                        e.printStackTrace();
+                    }
+//                ESNetworkAccessor.getESNetworkAccessor().deleteZipFileAndRemoveFromUploadQueue(zipFilename);
+                    try {
+                        Path temp = Files.move
+                                (Paths.get(orgPath),
+                                        Paths.get(tgtPath), REPLACE_EXISTING);
+                        Log.v(LOG_TAG, "File moved to uploaded dir.");
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Error when moving data to uploaded dir.");
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }*/
+
     public static void uploadFile2S3(File file) {
         Context context = ESApplication.getTheAppContext();
                 if (file.exists()) {
@@ -794,6 +831,44 @@ public class ESNetworkAccessor {
 //            File zipFile = new File(ESApplication.getZipDir(), zipFilename);
 
             uploadDirectory2S3(folder);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void param) {
+//            super.onPostExecute();
+            // Since zip uploaded successfully, can remove it from network queue and delete the file:
+//            ESNetworkAccessor.getESNetworkAccessor().deleteZipFileAndRemoveFromUploadQueue(zipFilename);
+//            Log.v(LOG_TAG, "File name removed from upload queue");
+        }
+    }
+
+    public static class CombineAllDataTask extends AsyncTask<File, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            Log.v(LOG_TAG, "Start S3UploadDataTask");
+            super.onPreExecute();
+            if (!rawDir.exists()){
+                rawDir.mkdir();
+            }
+            if (!uploadedDir.exists()){
+                uploadedDir.mkdir();
+            }
+            if (!combinedDir.exists()){
+                combinedDir.mkdir();
+            }
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        @Override
+        protected Void doInBackground(File... params) {
+            // Get context
+            // Load data
+            File folder = params[0];
+//            File zipFile = new File(ESApplication.getZipDir(), zipFilename);
+
+            //combineAll(folder);
 
             return null;
         }

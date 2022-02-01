@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import edu.ucsd.calab.extrasensory.data.ESDatabaseAccessor;
 import edu.ucsd.calab.extrasensory.data.ESLabelStruct;
 import edu.ucsd.calab.extrasensory.data.ESTimestamp;
 import edu.ucsd.calab.extrasensory.sensors.ESSensorManager;
+import edu.ucsd.calab.extrasensory.sensors.polarandroidblesdk.PolarActivity;
 
 import static edu.ucsd.calab.extrasensory.data.ESDatabaseAccessor.getESDatabaseAccessor;
 
@@ -73,7 +75,7 @@ public class FeedbackActivity extends BaseActivity {
 
     private ESLabelStruct _labelStruct = new ESLabelStruct();
     private String _validFor = SelectionFromListActivity.getValidForValues()[0];
-    public int _validForHowManyMinutes;
+    private int _validForHowManyMinutes;
     private String _historyValidFor = "";
     private boolean _presentServerGuesses;
 
@@ -361,6 +363,10 @@ public class FeedbackActivity extends BaseActivity {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View arg0) {
+                if (PolarActivity.batterylevel < 5) {
+                    Toast toast = Toast.makeText(context, "Your Polar device has a low battery level under 5%. Please charge.",Toast.LENGTH_SHORT);
+                    toast.show();
+                }
                 ESTimestamp timestampPressSendButton = new ESTimestamp();
                 boolean initiatedByNotification = getIntent().hasExtra(KEY_INITIATED_BY_NOTIFICATION);
 
@@ -399,6 +405,9 @@ public class FeedbackActivity extends BaseActivity {
                     ((ESApplication)getApplication()).startActiveFeedback(_labelStruct, _validForHowManyMinutes, initiatedByNotification,
                             _timestampOpenFeedbackForm, timestampPressSendButton, _parameters._timestampNotification , _parameters._timestampUserRespondToNotification);
                     ESSensorManager.getForHowManyMinutes(_validForHowManyMinutes);
+                    ESSensorManager.getMainActivity(_labelStruct._mainActivity);
+                    ESSensorManager.getSecondaryActivity(_labelStruct._secondaryActivities);
+                    ESSensorManager.getMood(_labelStruct._moods);
                     finish();
                     return;
                 }
@@ -469,11 +478,6 @@ public class FeedbackActivity extends BaseActivity {
                 _validForHowManyMinutes = Integer.parseInt(splited[0]);
                 break;
         }
-    }
-
-    public int timevalidFor(int x) {
-        _validForHowManyMinutes = x;
-    return _validForHowManyMinutes;
     }
 
     private static String joinPredictedLabels(String[] labels,int maxChars) {

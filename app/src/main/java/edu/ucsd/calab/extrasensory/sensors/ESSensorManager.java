@@ -42,7 +42,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -70,14 +69,13 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import edu.ucsd.calab.extrasensory.ESApplication;
-import edu.ucsd.calab.extrasensory.R;
 import edu.ucsd.calab.extrasensory.data.ESDataFilesAccessor;
-import edu.ucsd.calab.extrasensory.data.ESLabelStruct;
 import edu.ucsd.calab.extrasensory.data.ESSettings;
 import edu.ucsd.calab.extrasensory.data.ESTimestamp;
 import edu.ucsd.calab.extrasensory.network.ESNetworkAccessor;
@@ -114,6 +112,9 @@ public class ESSensorManager extends Context
     private static final int LOW_FREQ_SAMPLE_PERIOD_MICROSECONDS = 1000000;
     private static final int SAMPLE_PERIOD_MICROSECONDS = 25000;
     private static int validForHowManyMinutespublic;
+    private static String mainActivitypublic;
+    private static String[] secondaryActivitypublic;
+    private static String[] moodpublic;
     private final int NUM_SAMPLES_IN_SESSION = 1800;
     private static final double NANOSECONDS_IN_SECOND = 1e9f;
     private static final double NANOSECONDS_IN_MILLISECOND = 1e6f;
@@ -121,7 +122,7 @@ public class ESSensorManager extends Context
     private static final long LOCATION_UPDATE_INTERVAL_MILLIS = 500;
     private static final long LOCATION_FASTEST_UPDATE_INTERVAL_MILLIS = 50;
     private static final float LOCATION_BUBBLE_RADIUS_METERS = 500.0f;
-    private static final String HIGH_FREQ_DATA_FILENAME = "HF_DUR_DATA.txt";
+    private static final String HIGH_FREQ_DATA_FILENAME = ".json";
     private static final int MAX_TIME_RECORDING_IN_SECONDS = 20000;// ESApplication.validForHowManyMinutespublic - 30;
 
     // Raw motion sensors:
@@ -375,6 +376,15 @@ public class ESSensorManager extends Context
 
     public static void getForHowManyMinutes(int validForHowManyMinutes) {
         validForHowManyMinutespublic = validForHowManyMinutes;
+    }
+    public static void getMainActivity(String mainActivity) {
+        mainActivitypublic = mainActivity;
+    }
+    public static void getSecondaryActivity(String[] secondaryActivity) {
+        secondaryActivitypublic = secondaryActivity;
+    }
+    public static void getMood(String[] mood) {
+        moodpublic = mood;
     }
 
     private void set_recordingRightNow(boolean recordingRightNow) {
@@ -1014,10 +1024,10 @@ public class ESSensorManager extends Context
         _timestamp = timestamp;
         /////////////////////////
         // This is just for debugging. With the simulator (that doesn't produce actual sensor events):
-        if (debugSensorSimulationMode()) {
-            simulateRecordingSession();
-            return;
-        }
+      //  if (debugSensorSimulationMode()) {
+       //     simulateRecordingSession();
+       //     return;
+       // }
         /////////////////////////
 
         // Start recording location:
@@ -1144,9 +1154,9 @@ public class ESSensorManager extends Context
             addHighFrequencyMeasurement(RAW_ACC_X, (double) 0);
             addHighFrequencyMeasurement(RAW_ACC_Y, (double) 1);
             addHighFrequencyMeasurement(RAW_ACC_Z, (double) 2);
-            if (addHighFrequencyMeasurement(RAW_ACC_TIME_S, (double) 111)) {
+         //   if (addHighFrequencyMeasurement(RAW_ACC_TIME_S, (double) 111)) {
                 finishSessionIfReady();
-            }
+         //   }
         }
     }
 
@@ -1198,7 +1208,7 @@ public class ESSensorManager extends Context
 
         // Check if the vector for this key was already initialized:
         if (!_highFreqData.containsKey(key)) {
-            _highFreqData.put(key, new ArrayList<Double>(NUM_SAMPLES_IN_SESSION*validForHowManyMinutespublic));
+            _highFreqData.put(key, new ArrayList<Double>());
         }
 
         Objects.requireNonNull(_highFreqData.get(key)).add(measurement);
@@ -1208,7 +1218,7 @@ public class ESSensorManager extends Context
             logCurrentSampleSize();
         }
 
-        return (Objects.requireNonNull(_highFreqData.get(key)).size() >= NUM_SAMPLES_IN_SESSION*validForHowManyMinutespublic);
+        return false;
     }
 
 
@@ -1233,7 +1243,7 @@ public class ESSensorManager extends Context
     private void finishIfTooMuchTimeRecording() throws JSONException {
         ESTimestamp now = new ESTimestamp();
         int timeRecording = now.differenceInSeconds(_timestamp);
-        if (timeRecording >= MAX_TIME_RECORDING_IN_SECONDS) {
+        if (timeRecording >= (validForHowManyMinutespublic*60)) {
             Log.d(LOG_TAG, "Finishing this recording because it is already too long, num seconds: " + timeRecording);
             finishSession();
         }
@@ -1340,6 +1350,25 @@ public class ESSensorManager extends Context
         // Construct an object with all the data:
         JSONObject data = new JSONObject();
 
+        // Add label
+        Set<String> labels;
+        labels = ESDataFilesAccessor.writeUserLabels(
+                mainActivitypublic,secondaryActivitypublic,moodpublic);
+        data.put("labels", labels);
+
+        JSONArray labelsJsonArray = new JSONArray();
+        String[] userLabels = new String[labels.size()];
+        labels.toArray(userLabels);
+        for (String userLabel : userLabels) {
+            labelsJsonArray.put(userLabel);
+        }
+        try {
+            data.put("labels",labelsJsonArray);
+        }
+        catch (JSONException e) {
+            Log.e(LOG_TAG,"JSON: failed putting label " + ". Message: " + e.getMessage());
+        }
+
         // Add high-frequency data:
         for (String key : _highFreqData.keySet()) {
             JSONArray samples = new JSONArray(_highFreqData.get(key));
@@ -1349,7 +1378,6 @@ public class ESSensorManager extends Context
                 Log.e(LOG_TAG, "JSON: failed putting key " + key + ". Message: " + e.getMessage());
             }
         }
-
 
         // Add Polar data:
         if (polarhrMeasurements != null) {
@@ -1362,6 +1390,7 @@ public class ESSensorManager extends Context
                 Log.e(LOG_TAG,"JSON: failed putting polar hr key " + key + ". Message: " + e.getMessage());
             }
         }}
+
         /*    if (polaraccxMeasurements != null) {
             for (String key : polaraccxMeasurements.keySet()) {
                 JSONArray samples = new JSONArray(polaraccxMeasurements.get(key));
@@ -1559,8 +1588,8 @@ public class ESSensorManager extends Context
         writeFile(dataStr);
 
         // Zip the files:
-        String zipFilename = createZipFile(dataStr);
-        Log.i(LOG_TAG, "Created zip file: " + zipFilename);
+   //     String zipFilename = createZipFile(dataStr);
+   //     Log.i(LOG_TAG, "Created zip file: " + zipFilename);
 
         // Add this zip file to the network queue:
 //        if (zipFilename != null) {
@@ -1655,15 +1684,12 @@ public class ESSensorManager extends Context
 
             // Add the data files:
             // The high frequency measurements data:
-            zos.putNextEntry(new ZipEntry(HIGH_FREQ_DATA_FILENAME));
+            zos.putNextEntry(new ZipEntry(currentZipFilename()+HIGH_FREQ_DATA_FILENAME));
             zos.write(highFreqDataStr.getBytes());
             zos.closeEntry();
 
             // Close the zip:
             zos.close();
-        } catch (FileNotFoundException e) {
-            Log.e(LOG_TAG, e.getMessage());
-            return null;
         } catch (IOException e) {
             Log.e(LOG_TAG, e.getMessage());
             return null;
@@ -1672,22 +1698,17 @@ public class ESSensorManager extends Context
         return zipFilename;
     }
 
-    private boolean writeFile(String content) {
-        FileOutputStream fos = null;
+    private void writeFile(String content) {
+        FileOutputStream fos;
         try {
-            File outFile = new File(ESDataFilesAccessor.getLabelFilesDir(), ESSensorManager.HIGH_FREQ_DATA_FILENAME);
+            File outFile = new File(ESDataFilesAccessor.getLabelFilesDir(), currentZipFilename() + ESSensorManager.HIGH_FREQ_DATA_FILENAME);
             fos = new FileOutputStream(outFile);
             fos.write(content.getBytes());
             fos.close();
-        } catch (FileNotFoundException e) {
-            Log.e(LOG_TAG, e.getMessage());
-            return false;
         } catch (IOException e) {
             Log.e(LOG_TAG, e.getMessage());
-            return false;
         }
 
-        return true;
     }
 
     /**
@@ -1700,7 +1721,7 @@ public class ESSensorManager extends Context
     }
 
     public static String getZipFilename(ESTimestamp timestamp) {
-        return timestamp.toString() + "-" + ESSettings.uuid() + ".zip";
+        return timestamp.toString() + "-" + ESSettings.uuid();
     }
 
     private String currentZipFilename() {
@@ -1708,22 +1729,13 @@ public class ESSensorManager extends Context
     }
 
     private boolean checkIfShouldFinishSession() {
-        if (_highFreqData == null) {
-            Log.e(LOG_TAG, "high frequency data is null");
+        ESTimestamp now = new ESTimestamp();
+        int timeRecording = now.differenceInSeconds(_timestamp);
+        if (timeRecording >= (validForHowManyMinutespublic*60)) {
+            Log.d(LOG_TAG, "Finishing this recording because it is already too long, num seconds: " + timeRecording);
             return true;
         }
-
-        // Check expected feature keys:
-        for (String featureKey : _sensorKeysThatShouldGetEnoughSamples) {
-            if (!_highFreqData.containsKey(featureKey) ||
-                    _highFreqData.get(featureKey) == null ||
-                    _highFreqData.get(featureKey).size() < NUM_SAMPLES_IN_SESSION*validForHowManyMinutespublic) {
-                // Then we should wait for this key's sensor to finish sampling
-                return false;
-            }
-        }
-
-        return true;
+        return false;
     }
 
 
@@ -1838,7 +1850,9 @@ public class ESSensorManager extends Context
                     addHighFrequencyMeasurement(RAW_ACC_Z, (double) event.values[2]);
                     addHighFrequencyMeasurement(RAW_ACC_UNIX_TIME, (double) unixTime);
                     addHighFrequencyMeasurement(RAW_ACC_TIME_MS, timestampMilliSeconds);
-                    sensorCollectedEnough = addHighFrequencyMeasurement(RAW_ACC_TIME_S, timestampSeconds);}
+                    //sensorCollectedEnough = addHighFrequencyMeasurement(RAW_ACC_TIME_S, timestampSeconds);
+                        addHighFrequencyMeasurement(RAW_ACC_TIME_S, timestampSeconds);
+                    }
                     break;
                 case Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED:
                     if (_highFreqData == null) {
@@ -1861,7 +1875,8 @@ public class ESSensorManager extends Context
                     addHighFrequencyMeasurement(RAW_MAGNET_BIAS_Z, (double) event.values[5]);
                     addHighFrequencyMeasurement(RAW_MAGNET_UNIX_TIME, (double) unixTime);
                     addHighFrequencyMeasurement(RAW_MAGNET_TIME_MS, timestampMilliSeconds);
-                    sensorCollectedEnough = addHighFrequencyMeasurement(RAW_MAGNET_TIME_S, timestampSeconds);}
+                    //sensorCollectedEnough = addHighFrequencyMeasurement(RAW_MAGNET_TIME_S, timestampSeconds);
+                        addHighFrequencyMeasurement(RAW_MAGNET_TIME_S, timestampSeconds);}
                     break;
                 case Sensor.TYPE_GYROSCOPE_UNCALIBRATED:
                     if (_highFreqData == null) {
@@ -1884,7 +1899,8 @@ public class ESSensorManager extends Context
                     addHighFrequencyMeasurement(RAW_GYRO_DRIFT_Z, (double) event.values[5]);
                     addHighFrequencyMeasurement(RAW_GYRO_UNIX_TIME, (double) unixTime);
                     addHighFrequencyMeasurement(RAW_GYRO_TIME_MS, timestampMilliSeconds);
-                    sensorCollectedEnough = addHighFrequencyMeasurement(RAW_GYRO_TIME_S, timestampSeconds);}
+                    //sensorCollectedEnough = addHighFrequencyMeasurement(RAW_GYRO_TIME_S, timestampSeconds);}
+                    addHighFrequencyMeasurement(RAW_GYRO_TIME_S, timestampSeconds);}
                     break;
                 case Sensor.TYPE_GRAVITY:
                     addHighFrequencyMeasurement(PROC_GRAV_X, (double) event.values[0]);
@@ -1892,7 +1908,8 @@ public class ESSensorManager extends Context
                     addHighFrequencyMeasurement(PROC_GRAV_Z, (double) event.values[2]);
                     addHighFrequencyMeasurement(PROC_GRAV_UNIX_TIME, (double) unixTime);
                     addHighFrequencyMeasurement(PROC_GRAV_TIME_MS, timestampMilliSeconds);
-                    sensorCollectedEnough = addHighFrequencyMeasurement(PROC_GRAV_TIME_S, timestampSeconds);
+                   // sensorCollectedEnough = addHighFrequencyMeasurement(PROC_GRAV_TIME_S, timestampSeconds);
+                    addHighFrequencyMeasurement(PROC_GRAV_TIME_S, timestampSeconds);
                     break;
                 case Sensor.TYPE_LINEAR_ACCELERATION:
                     addHighFrequencyMeasurement(PROC_ACC_X, (double) event.values[0]);
@@ -1900,7 +1917,8 @@ public class ESSensorManager extends Context
                     addHighFrequencyMeasurement(PROC_ACC_Z, (double) event.values[2]);
                     addHighFrequencyMeasurement(PROC_ACC_UNIX_TIME, (double) unixTime);
                     addHighFrequencyMeasurement(PROC_ACC_TIME_MS, timestampMilliSeconds);
-                    sensorCollectedEnough = addHighFrequencyMeasurement(PROC_ACC_TIME_S, timestampSeconds);
+                    //sensorCollectedEnough = addHighFrequencyMeasurement(PROC_ACC_TIME_S, timestampSeconds);
+                    addHighFrequencyMeasurement(PROC_ACC_TIME_S, timestampSeconds);
                     break;
                 case Sensor.TYPE_MAGNETIC_FIELD:
                     addHighFrequencyMeasurement(PROC_MAGNET_X, (double) event.values[0]);
@@ -1908,7 +1926,8 @@ public class ESSensorManager extends Context
                     addHighFrequencyMeasurement(PROC_MAGNET_Z, (double) event.values[2]);
                     addHighFrequencyMeasurement(PROC_MAGNET_UNIX_TIME, (double) unixTime);
                     addHighFrequencyMeasurement(PROC_MAGNET_TIME_MS, timestampMilliSeconds);
-                    sensorCollectedEnough = addHighFrequencyMeasurement(PROC_MAGNET_TIME_S, timestampSeconds);
+                  //  sensorCollectedEnough = addHighFrequencyMeasurement(PROC_MAGNET_TIME_S, timestampSeconds);
+                    addHighFrequencyMeasurement(PROC_MAGNET_TIME_S, timestampSeconds);
                     break;
                 case Sensor.TYPE_GYROSCOPE:
                     addHighFrequencyMeasurement(PROC_GYRO_X, (double) event.values[0]);
@@ -1916,7 +1935,8 @@ public class ESSensorManager extends Context
                     addHighFrequencyMeasurement(PROC_GYRO_Z, (double) event.values[2]);
                     addHighFrequencyMeasurement(PROC_GYRO_UNIX_TIME, (double) unixTime);
                     addHighFrequencyMeasurement(PROC_GYRO_TIME_MS, timestampMilliSeconds);
-                    sensorCollectedEnough = addHighFrequencyMeasurement(PROC_GYRO_TIME_S, timestampSeconds);
+                   // sensorCollectedEnough = addHighFrequencyMeasurement(PROC_GYRO_TIME_S, timestampSeconds);
+                    addHighFrequencyMeasurement(PROC_GYRO_TIME_S, timestampSeconds);
                     break;
                 case Sensor.TYPE_ROTATION_VECTOR:
                     addHighFrequencyMeasurement(PROC_ROTATION_X, (double) event.values[0]);
@@ -1926,7 +1946,8 @@ public class ESSensorManager extends Context
 //                addHighFrequencyMeasurement(PROC_ROTATION_ACCURACY,event.values[5]);
                     addHighFrequencyMeasurement(PROC_ROTATION_UNIX_TIME, (double) unixTime);
                     addHighFrequencyMeasurement(PROC_ROTATION_TIME_MS, timestampMilliSeconds);
-                    sensorCollectedEnough = addHighFrequencyMeasurement(PROC_ROTATION_TIME_S, timestampSeconds);
+                 //   sensorCollectedEnough = addHighFrequencyMeasurement(PROC_ROTATION_TIME_S, timestampSeconds);
+                    addHighFrequencyMeasurement(PROC_ROTATION_TIME_S, timestampSeconds);
                     break;
                 // Low frequency (one-time) sensors:
                 case Sensor.TYPE_AMBIENT_TEMPERATURE:
@@ -1952,7 +1973,12 @@ public class ESSensorManager extends Context
                 default:
                     Log.e(LOG_TAG, "Got event from unsupported sensor with type " + event.sensor.getType());
             }
-
+         /*   ESTimestamp now = new ESTimestamp();
+            int timeRecording = now.differenceInSeconds(_timestamp);
+            if (timeRecording >= (validForHowManyMinutespublic*60)) {
+                Log.d(LOG_TAG, "Finishing this recording because it is already too long, num seconds: " + timeRecording);
+                finishSession();
+            }*/
             finishIfTooMuchTimeRecording();
             if (sensorCollectedEnough) {
                 // Then we've collected enough samples from accelerometer,

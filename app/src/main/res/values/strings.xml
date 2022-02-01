@@ -47,8 +47,9 @@
     <string name="https_on">on</string>
     <string name="https_off">off</string>
     <string name="alert_for_active_feedback_while_data_collection_off">Data collection is off now. Please turn it on before labeling your activity.</string>
-    <string name="alert_for_active_feedback_while_Polar_disconnected">Polar device is disconnected now. Please connect with your Polar device before labeling your activity.</string>
-    <string name="alert_for_active_feedback_while_recording_ongoing">A recording session is ongoing. Please wait until its done before starting a new session.</string>
+    <string name="alert_for_active_feedback_while_Polar_disconnected">Your Polar device is not connected. Please connect to your Polar device before labeling your activity.</string>
+    <string name="alert_for_active_feedback_while_recording_ongoing">A recording session is ongoing. Please wait until it is done before starting a new session.</string>
+    <string name="alert_if_Polar_disconnected">Your Polar device is not connected. Please connect.</string>
     <string name="ok_button_text">O.K.</string>
     <string name="home_sensing_off">no</string>
     <string name="home_sensing_on">yes</string>

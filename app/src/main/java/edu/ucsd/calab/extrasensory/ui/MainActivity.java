@@ -61,13 +61,39 @@ public class MainActivity extends BaseActivity {
         //buttonRequest.setOnClickListener(new View.OnClickListener() {
             //@Override
             //public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(MainActivity.this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(MainActivity.this, "You have already granted all permissions!",
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    requestAllPermissions();
-                }
+        if ((ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) &
+                (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) &
+                (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) &
+                (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) &
+                (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED) &
+                (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) &
+                (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED) &
+                (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) &
+                (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED) &
+                (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED)) {
+            Toast.makeText(MainActivity.this, "You have already granted all permissions!",
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            requestAllPermissions();
+        }
+        if (!PolarActivity.isPolarConnected()) {
+            Log.i(LOG_TAG,"Polar is not connected");
+            AlertDialog.Builder builder = new AlertDialog.Builder(this).
+                    setIcon(R.drawable.ic_launcher).setMessage("Please connect to a Polar device.").
+                    setTitle("NJSensory").setNegativeButton(R.string.ok_button_text, (dialog, which)
+                    -> dialog.dismiss());
+            builder.create().show();
+        }
             //}
         //});
 
@@ -77,8 +103,8 @@ public class MainActivity extends BaseActivity {
         // Add the tabs:
         _fragmentTabHost.addTab(_fragmentTabHost.newTabSpec(getString(R.string.tab_home_tag)).setIndicator(getString(R.string.tab_home_indicator)),
                 HomeFragment.class, null);
-        _fragmentTabHost.addTab(_fragmentTabHost.newTabSpec(getString(R.string.tab_history_tag)).setIndicator(getString(R.string.tab_history_indicator)),
-                HistoryFragment.class, null);
+        //_fragmentTabHost.addTab(_fragmentTabHost.newTabSpec(getString(R.string.tab_history_tag)).setIndicator(getString(R.string.tab_history_indicator)),
+         //       HistoryFragment.class, null);
         _fragmentTabHost.addTab(_fragmentTabHost.newTabSpec(getString(R.string.tab_summary_tag)).setIndicator(getString(R.string.tab_summary_indicator)),
                 SummaryFragment.class,null);
 
@@ -280,7 +306,7 @@ public class MainActivity extends BaseActivity {
                     Log.i(LOG_TAG,"Active feedback pressed, but data-collection is off");
                     AlertDialog.Builder builder = new AlertDialog.Builder(this).
                             setIcon(R.drawable.ic_launcher).setMessage(R.string.alert_for_active_feedback_while_data_collection_off).
-                            setTitle("ExtraSensory").setNegativeButton(R.string.ok_button_text,new DialogInterface.OnClickListener() {
+                            setTitle("NJSensory").setNegativeButton(R.string.ok_button_text,new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
@@ -293,7 +319,7 @@ public class MainActivity extends BaseActivity {
                     Log.i(LOG_TAG,"Active feedback pressed, but Polar device is not connected");
                     AlertDialog.Builder builder = new AlertDialog.Builder(this).
                             setIcon(R.drawable.ic_launcher).setMessage(R.string.alert_for_active_feedback_while_Polar_disconnected).
-                            setTitle("ExtraSensory").setNegativeButton(R.string.ok_button_text,new DialogInterface.OnClickListener() {
+                            setTitle("NJSensory").setNegativeButton(R.string.ok_button_text,new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
@@ -306,7 +332,7 @@ public class MainActivity extends BaseActivity {
                     Log.i(LOG_TAG,"Active feedback pressed, but a recording session is ongoing");
                     AlertDialog.Builder builder = new AlertDialog.Builder(this).
                             setIcon(R.drawable.ic_launcher).setMessage(R.string.alert_for_active_feedback_while_recording_ongoing).
-                            setTitle("ExtraSensory").setNegativeButton(R.string.ok_button_text,new DialogInterface.OnClickListener() {
+                            setTitle("NJSensory").setNegativeButton(R.string.ok_button_text,new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
@@ -314,6 +340,22 @@ public class MainActivity extends BaseActivity {
                     });
                     builder.create().show();
                     break;
+                    }
+               /* if (PolarActivity.batterylevel < 100) {
+                    Log.i(LOG_TAG,"Active feedback pressed, but a recording session is ongoing");
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this).
+                            setIcon(R.drawable.ic_launcher).setMessage("Your Polar device has a low battery level under 5%. Please charge.").
+                            setTitle("NJSensory").setNegativeButton(R.string.ok_button_text,new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.create().show();
+                    break;*/
+                if (PolarActivity.batterylevel < 5) {
+                    Toast toast = Toast.makeText(this, "Your Polar device has a low battery level under 5%. Please charge.",Toast.LENGTH_SHORT);
+                    toast.show();
                 }
                 intent = new Intent(getApplicationContext(),FeedbackActivity.class);
                 FeedbackActivity.setFeedbackParametersBeforeStartingFeedback(new FeedbackActivity.FeedbackParameters());
@@ -330,5 +372,13 @@ public class MainActivity extends BaseActivity {
         setIntent.addCategory(Intent.CATEGORY_HOME);
         setIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(setIntent);
+        if (!PolarActivity.isPolarConnected()) {
+            Log.i(LOG_TAG,"Polar is not connected");
+            AlertDialog.Builder builder = new AlertDialog.Builder(this).
+                    setIcon(R.drawable.ic_launcher).setMessage(R.string.alert_if_Polar_disconnected).
+                    setTitle("NJSensory").setNegativeButton(R.string.ok_button_text, (dialog, which)
+                    -> dialog.dismiss());
+            builder.create().show();
+        }
     }
 }

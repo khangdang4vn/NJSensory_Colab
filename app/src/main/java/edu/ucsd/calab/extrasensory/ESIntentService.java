@@ -48,7 +48,7 @@ public class ESIntentService extends IntentService {
     public static final String ACTION_NOTIFICATION_CHECKUP = "edu.ucsd.calab.extrasensory.action.NOTIFICATION_CHECKUP";
 
     public ESIntentService() {
-        super("ExtraSensory");
+        super("NJSensory");
     }
 
     @Override
@@ -64,9 +64,9 @@ public class ESIntentService extends IntentService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("ExtraSensory is running in the background")
+                .setContentTitle("NJSensory is running in the background")
                 .setContentText(input)
-                .setSmallIcon(R.drawable.ic_android)
+                .setSmallIcon(R.drawable.ic_launcher)
                 .setContentIntent(pendingIntent)
                 .build();
         startForeground(1, notification);

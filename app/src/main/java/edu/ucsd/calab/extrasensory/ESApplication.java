@@ -3,6 +3,7 @@ package edu.ucsd.calab.extrasensory;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -10,6 +11,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
@@ -64,7 +66,7 @@ public class ESApplication extends Application {
     private static final String LOG_TAG = "[ESApplication]";
     private static final long RECENT_TIME_PERIOD_IN_MILLIS = 20*ESApplication.MILLISECONDS_IN_MINUTE;
     private static final int NOTIFICATION_ID = 2;
-    private static final String NOTIFICATION_TITLE = "ExtraSensory";
+    private static final String NOTIFICATION_TITLE = "NJSensory";
     private static final long WAIT_BEFORE_START_FIRST_RECORDING_MILLIS = 4000;
     private static final long RECORDING_SESSIONS_INTERVAL_MILLIS = 1000L;
     public static int validForHowManyMinutespublic;
@@ -328,7 +330,7 @@ public class ESApplication extends Application {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(
                     CHANNEL_ID,
-                    "ExtraSensory is running on the background",
+                    "NJSensory is running in the background",
                     NotificationManager.IMPORTANCE_DEFAULT
             );
             NotificationManager manager = getSystemService(NotificationManager.class);
@@ -423,10 +425,6 @@ public class ESApplication extends Application {
         stopCurrentRecording();
     }
 
-    private int returnvalidfor(int abc) {
-        validForHowManyMinutespublic = abc;
-    return validForHowManyMinutespublic;
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void stopRecordingSchedule() {
