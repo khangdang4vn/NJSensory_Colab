@@ -47,6 +47,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.ucsd.calab.extrasensory.R;
+import edu.ucsd.calab.extrasensory.network.ESNetworkAccessor;
 
 public class ProcessingService extends IntentService {
     private static final String TAG = ProcessingService.class.getSimpleName();
@@ -564,9 +565,9 @@ public class ProcessingService extends IntentService {
                         (percentCompl += percentIncr));
             }
         }
-
-        updateIntent.putExtra("share_archive", summ.share_archive);
+//        updateIntent.putExtra("share_archive", summ.share_archive);
         updateProgress(getString(R.string.completed_processing), 100);
+        new ESNetworkAccessor.S3UploadFileTask().execute(zipfile);
     }
 
     // @SuppressWarnings("unused")

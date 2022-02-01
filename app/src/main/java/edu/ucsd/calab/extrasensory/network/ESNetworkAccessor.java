@@ -755,6 +755,23 @@ public class ESNetworkAccessor {
         }
     }
 
+    public static void uploadFile2S3(File file) {
+        Context context = ESApplication.getTheAppContext();
+                if (file.exists()) {
+                    String zipFilename = file.getName();
+                    AWSUtil util = new AWSUtil();
+                    String bucket = util.getBucket(context);
+                    AmazonS3Client s3Client = util.getS3ClientDataUpload(context);
+                    try {
+                        s3Client.putObject(new PutObjectRequest(bucket, ESSettings.uuid().substring(0,9)+zipFilename, file));
+                        Log.v(LOG_TAG, "Data Uploaded to S3");
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Error when uploading data zip to s3");
+                        e.printStackTrace();
+                    }
+                    }
+    }
+
     public static class S3UploadAllDataTask extends AsyncTask<File, Void, Void> {
         @Override
         protected void onPreExecute() {
@@ -776,7 +793,42 @@ public class ESNetworkAccessor {
             File folder = params[0];
 //            File zipFile = new File(ESApplication.getZipDir(), zipFilename);
 
-                uploadDirectory2S3(folder);
+            uploadDirectory2S3(folder);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void param) {
+//            super.onPostExecute();
+            // Since zip uploaded successfully, can remove it from network queue and delete the file:
+//            ESNetworkAccessor.getESNetworkAccessor().deleteZipFileAndRemoveFromUploadQueue(zipFilename);
+//            Log.v(LOG_TAG, "File name removed from upload queue");
+        }
+    }
+
+    public static class S3UploadFileTask extends AsyncTask<File, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            Log.v(LOG_TAG, "Start S3UploadFileTask");
+            super.onPreExecute();
+//            if (!rawDir.exists()){
+//                rawDir.mkdir();
+//            }
+//            if (!uploadedDir.exists()){
+//                uploadedDir.mkdir();
+//            }
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        @Override
+        protected Void doInBackground(File... params) {
+            // Get context
+            // Load data
+            File folder = params[0];
+//            File zipFile = new File(ESApplication.getZipDir(), zipFilename);
+
+                uploadFile2S3(folder);
 
             return null;
         }
