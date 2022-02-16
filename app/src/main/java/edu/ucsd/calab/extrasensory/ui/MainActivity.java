@@ -1,14 +1,17 @@
 package edu.ucsd.calab.extrasensory.ui;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,13 +27,18 @@ import androidx.fragment.app.FragmentTabHost;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Objects;
 
 import edu.ucsd.calab.extrasensory.ESApplication;
 import edu.ucsd.calab.extrasensory.R;
 import edu.ucsd.calab.extrasensory.conversationbackup.ArchivesActivity;
 import edu.ucsd.calab.extrasensory.conversationbackup.ConversationBackupActivity;
+import edu.ucsd.calab.extrasensory.questionnaire.AlarmReceiver;
+import edu.ucsd.calab.extrasensory.questionnaire.QuestionActivity;
 import edu.ucsd.calab.extrasensory.sensors.ESSensorManager;
 import edu.ucsd.calab.extrasensory.sensors.polarandroidblesdk.PolarActivity;
 
@@ -49,6 +57,12 @@ public class MainActivity extends BaseActivity {
     private static final String LOG_TAG = "[MainActivity]";
 
     private final int MULTIPLE_PERMISSIONS_REQUEST_CODE = 1;
+
+    private static int alarm_code = 1;
+
+    private static final int QUESTIONNAIRE_REQUEST = 2018;
+
+    private AlarmManager _alarmManager;
 
     @RequiresApi(api = Build.VERSION_CODES.S)
     @Override
@@ -69,6 +83,8 @@ public class MainActivity extends BaseActivity {
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) &
                 (ContextCompat.checkSelfPermission(MainActivity.this,
                         Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) &
+              //  (ContextCompat.checkSelfPermission(MainActivity.this,
+              //          Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) &
                 (ContextCompat.checkSelfPermission(MainActivity.this,
                         Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED) &
                 (ContextCompat.checkSelfPermission(MainActivity.this,
@@ -96,6 +112,48 @@ public class MainActivity extends BaseActivity {
         }
             //}
         //});
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 9);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        // Check if current time is smaller than cal time
+        // otherwise notifications will come same day.
+        //if (System.currentTimeMillis() <= calendar.getTimeInMillis()) {
+            if (alarm_code == 1) {
+            AlarmManager alarmManager=(AlarmManager)getSystemService(Context.ALARM_SERVICE);
+            Intent questions;
+            PendingIntent pendingIntentlongsurvey = PendingIntent.getBroadcast(getApplicationContext(),1, questions = new Intent(getApplicationContext(), QuestionActivity.class),PendingIntent.FLAG_IMMUTABLE);
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    calendar.getTimeInMillis(),
+                    pendingIntentlongsurvey);
+            //you have to pass as an extra the json string.
+            questions.putExtra("json_questions", loadQuestionnaireJson());
+            startActivityForResult(questions, QUESTIONNAIRE_REQUEST);
+            //SyncAlarm(context, calendar.getTimeInMillis());
+                alarm_code += 1;
+    //    }
+    }
+
+        AlarmManager alarmManager=(AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        Intent intent=new Intent(getApplicationContext(), AlarmReceiver.class);
+        PendingIntent pendingIntent=PendingIntent.getActivity(getApplicationContext(),1,intent,PendingIntent.FLAG_IMMUTABLE);
+        if (Build.VERSION.SDK_INT >= 23) {
+            // Wakes up the device in Doze Mode
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, 6000, // time in millis
+                    pendingIntent);
+        } else if (Build.VERSION.SDK_INT >= 19) {
+            // Wakes up the device in Idle Mode
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, 6000, pendingIntent);
+        } else {
+            // Old APIs
+            alarmManager.set(AlarmManager.RTC_WAKEUP, 6000, pendingIntent);
+        }
+
+        //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,6000,300000,pendingIntent);
+
+        //Intent questions = new Intent(getApplicationContext(), QuestionActivity.class);
 
         FragmentTabHost _fragmentTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         _fragmentTabHost.setup(getApplicationContext(), getSupportFragmentManager(), android.R.id.tabcontent);
@@ -141,6 +199,7 @@ public class MainActivity extends BaseActivity {
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
+                //Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                 Manifest.permission.VIBRATE,
                 Manifest.permission.READ_PHONE_STATE,
                 Manifest.permission.BLUETOOTH_SCAN,
@@ -150,28 +209,19 @@ public class MainActivity extends BaseActivity {
             new AlertDialog.Builder(this)
                     .setTitle("Permission needed")
                     .setMessage("This permission is needed because of this and that")
-                    .setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[] {Manifest.permission.READ_EXTERNAL_STORAGE,
-                                            Manifest.permission.RECORD_AUDIO,
-                                            Manifest.permission.ACCESS_FINE_LOCATION,
-                                            Manifest.permission.ACCESS_COARSE_LOCATION,
-                                            Manifest.permission.VIBRATE,
-                                            Manifest.permission.READ_PHONE_STATE,
-                                            Manifest.permission.BLUETOOTH_SCAN,
-                                            Manifest.permission.BLUETOOTH_CONNECT,
-                                            Manifest.permission.BLUETOOTH,
-                                            Manifest.permission.BLUETOOTH_ADMIN}, MULTIPLE_PERMISSIONS_REQUEST_CODE);
-                        }
-                    })
-                    .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
+                    .setPositiveButton("ok", (dialog, which) -> ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[] {Manifest.permission.READ_EXTERNAL_STORAGE,
+                                    Manifest.permission.RECORD_AUDIO,
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    //Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                                    Manifest.permission.VIBRATE,
+                                    Manifest.permission.READ_PHONE_STATE,
+                                    Manifest.permission.BLUETOOTH_SCAN,
+                                    Manifest.permission.BLUETOOTH_CONNECT,
+                                    Manifest.permission.BLUETOOTH,
+                                    Manifest.permission.BLUETOOTH_ADMIN}, MULTIPLE_PERMISSIONS_REQUEST_CODE))
+                    .setNegativeButton("cancel", (dialog, which) -> dialog.dismiss())
                     .create().show();
         } else {
             ActivityCompat.requestPermissions(this,
@@ -179,6 +229,7 @@ public class MainActivity extends BaseActivity {
                             Manifest.permission.RECORD_AUDIO,
                             Manifest.permission.ACCESS_FINE_LOCATION,
                             Manifest.permission.ACCESS_COARSE_LOCATION,
+                            //Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                             Manifest.permission.VIBRATE,
                             Manifest.permission.READ_PHONE_STATE,
                             Manifest.permission.BLUETOOTH_SCAN,
@@ -221,7 +272,7 @@ public class MainActivity extends BaseActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Permissions GRANTED", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Permissions DENIED", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Permissions DENIED", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -381,4 +432,24 @@ public class MainActivity extends BaseActivity {
             builder.create().show();
         }
     }
+
+    //json stored in the assets folder. but you can get it from wherever you like.
+    private String loadQuestionnaireJson()
+    {
+        try
+        {
+            InputStream is = Objects.requireNonNull(getApplicationContext().getAssets().open("questions_longsurvey.json"));
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            return new String(buffer, "UTF-8");
+        } catch (IOException ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+
 }

@@ -1044,19 +1044,19 @@ public class ESSensorManager extends Context
         }
 
         // Start recording Polar:
-        if (_polarProcessor.isPolarConnected()) {
-            _polarProcessor.startHRBroadcast();
-        }
-        else {
-            Log.d(LOG_TAG,"Not recording from Polar.");
-        }
+       // if (_polarProcessor.isPolarConnected()) {
+            PolarActivity.startHRBackground();
+      //  }
+        //else {
+     //       Log.d(LOG_TAG,"Not recording from Polar.");
+       // }
 
 
         // Start recording hi-frequency sensors:
         ArrayList<Integer> hfSensorTypesToRecord = ESSettings.highFreqSensorTypesToRecord();
         prepareListOfMeasurementsShouldGetEnoughSamples(hfSensorTypesToRecord);
         for (Sensor sensor : _hiFreqSensors) {
-            if (hfSensorTypesToRecord.contains(new Integer(sensor.getType()))) {
+            if (hfSensorTypesToRecord.contains(Integer.valueOf(sensor.getType()))) {
                 _sensorManager.registerListener(this, sensor, SAMPLE_PERIOD_MICROSECONDS);
                 Log.d(LOG_TAG, "== Registering for recording HF sensor: " + getSensorNiceName(sensor.getType()));
             } else {
@@ -1067,7 +1067,7 @@ public class ESSensorManager extends Context
         // Start low-frequency sensors:
         ArrayList<Integer> lfSensorTypesToRecord = ESSettings.lowFreqSensorTypesToRecord();
         for (Sensor sensor : _lowFreqSensors) {
-            if (lfSensorTypesToRecord.contains(new Integer(sensor.getType()))) {
+            if (lfSensorTypesToRecord.contains(Integer.valueOf(sensor.getType()))) {
                 _sensorManager.registerListener(this, sensor, LOW_FREQ_SAMPLE_PERIOD_MICROSECONDS);
             } else {
                 Log.d(LOG_TAG, "As requested: not recording LF sensor: " + getSensorNiceName(sensor.getType()));
@@ -1177,6 +1177,7 @@ public class ESSensorManager extends Context
         if (!clearBeforeStart && _polarProcessor.isPolarConnected()) {
             _polarProcessor.cleanPolarMeasurements();
         }
+        _polarProcessor.cleanPolarMeasurements();
     }
 
     /**

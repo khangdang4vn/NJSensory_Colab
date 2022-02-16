@@ -313,7 +313,7 @@ public class ESApplication extends Application {
         assert _polarProcessor != null;
         _polarProcessor.setTheESApplicationReference(this);
         if (_polarProcessor.isPolarConnected()) {
-          //  _polarProcessor.onResume();
+           // _polarProcessor.startHRBroadcast();
         }
 
         LocalBroadcastManager.getInstance(_appContext).registerReceiver(_broadcastReceiver,new IntentFilter(ESNetworkAccessor.BROADCAST_NETWORK_QUEUE_SIZE_CHANGED));

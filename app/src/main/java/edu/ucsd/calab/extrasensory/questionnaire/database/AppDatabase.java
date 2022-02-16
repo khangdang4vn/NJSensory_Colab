@@ -1,14 +1,15 @@
-package com.spk.questionnaire.questions.database;
+package edu.ucsd.calab.extrasensory.questionnaire.database;
+
+import android.content.Context;
 
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import android.content.Context;
 
-import com.spk.questionnaire.questions.qdb.QuestionChoicesDao;
-import com.spk.questionnaire.questions.qdb.QuestionDao;
-import com.spk.questionnaire.questions.qdb.QuestionEntity;
-import com.spk.questionnaire.questions.qdb.QuestionWithChoicesEntity;
+import edu.ucsd.calab.extrasensory.questionnaire.qdb.QuestionChoicesDao;
+import edu.ucsd.calab.extrasensory.questionnaire.qdb.QuestionDao;
+import edu.ucsd.calab.extrasensory.questionnaire.qdb.QuestionEntity;
+import edu.ucsd.calab.extrasensory.questionnaire.qdb.QuestionWithChoicesEntity;
 
 @Database(entities = {QuestionWithChoicesEntity.class, QuestionEntity.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase

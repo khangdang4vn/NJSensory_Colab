@@ -1,4 +1,4 @@
-package com.spk.questionnaire.questions.fragments;
+package edu.ucsd.calab.extrasensory.questionnaire.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,20 +12,21 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.spk.questionnaire.R;
-import com.spk.questionnaire.questions.QuestionActivity;
-import com.spk.questionnaire.questions.database.AppDatabase;
-import com.spk.questionnaire.questions.questionmodels.AnswerOptions;
-import com.spk.questionnaire.questions.questionmodels.QuestionsItem;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+
+import edu.ucsd.calab.extrasensory.R;
+import edu.ucsd.calab.extrasensory.questionnaire.QuestionActivity;
+import edu.ucsd.calab.extrasensory.questionnaire.database.AppDatabase;
+import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.AnswerOptions;
+import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.QuestionsItem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -58,7 +59,7 @@ public class CheckBoxesFragment extends Fragment
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_check_boxes, container, false);
+        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_questionnaire_check_boxes, container, false);
 
         appDatabase = AppDatabase.getAppDatabase(getActivity());
 

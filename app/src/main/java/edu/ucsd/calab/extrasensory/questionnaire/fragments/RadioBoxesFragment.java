@@ -1,4 +1,4 @@
-package com.spk.questionnaire.questions.fragments;
+package edu.ucsd.calab.extrasensory.questionnaire.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -13,18 +13,19 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.spk.questionnaire.R;
-import com.spk.questionnaire.questions.QuestionActivity;
-import com.spk.questionnaire.questions.database.AppDatabase;
-import com.spk.questionnaire.questions.questionmodels.AnswerOptions;
-import com.spk.questionnaire.questions.questionmodels.QuestionsItem;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+
+import edu.ucsd.calab.extrasensory.R;
+import edu.ucsd.calab.extrasensory.questionnaire.QuestionActivity;
+import edu.ucsd.calab.extrasensory.questionnaire.database.AppDatabase;
+import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.AnswerOptions;
+import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.QuestionsItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -59,7 +60,7 @@ public class RadioBoxesFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_radio_boxes, container, false);
+        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_questionnaire_radio_boxes, container, false);
 
         appDatabase = AppDatabase.getAppDatabase(getActivity());
 

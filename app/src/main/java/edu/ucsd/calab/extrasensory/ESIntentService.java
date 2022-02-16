@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+import androidx.fragment.app.FragmentActivity;
+import androidx.activity.ComponentActivity;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -17,10 +19,15 @@ import edu.ucsd.calab.extrasensory.data.ESActivity;
 import edu.ucsd.calab.extrasensory.data.ESDatabaseAccessor;
 import edu.ucsd.calab.extrasensory.data.ESLabelStruct;
 import edu.ucsd.calab.extrasensory.data.ESTimestamp;
+import edu.ucsd.calab.extrasensory.questionnaire.QuestionActivity;
 import edu.ucsd.calab.extrasensory.sensors.ESSensorManager;
 import edu.ucsd.calab.extrasensory.ui.MainActivity;
 
 import static edu.ucsd.calab.extrasensory.ESApplication.CHANNEL_ID;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 /**
  * An {@link JobIntentService} subclass for handling asynchronous task requests in
@@ -39,6 +46,7 @@ import static edu.ucsd.calab.extrasensory.ESApplication.CHANNEL_ID;
 public class ESIntentService extends IntentService {
 
     private static final String LOG_TAG = "[ESApplication]";
+    private static final int QUESTIONNAIRE_REQUEST = 2018;
 
       // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
 
@@ -149,4 +157,5 @@ public class ESIntentService extends IntentService {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
 }

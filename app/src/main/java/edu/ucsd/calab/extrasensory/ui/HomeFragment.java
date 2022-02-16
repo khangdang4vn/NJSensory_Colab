@@ -13,15 +13,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 
 import edu.ucsd.calab.extrasensory.ESApplication;
 import edu.ucsd.calab.extrasensory.R;
 import edu.ucsd.calab.extrasensory.network.ESNetworkAccessor;
+import edu.ucsd.calab.extrasensory.questionnaire.QuestionActivity;
 import edu.ucsd.calab.extrasensory.sensors.polarandroidblesdk.PolarActivity;
 
 /**
@@ -39,7 +41,7 @@ public class HomeFragment extends BaseTabFragment {
     private static final String LOG_TAG = "[ES-HomeFragment]";
     private static final String NO_AVAILABLE_NETWORK_FOR_SENDING = "There's no available network now to send the data to the server.";
     private static final String ALERT_BUTTON_TEXT_OK = "o.k.";
-
+    private static final int QUESTIONNAIRE_REQUEST = 2018;
 
     private ESApplication getESApplication()  {
         MainActivity mainActivity = (MainActivity) getActivity();
@@ -115,7 +117,36 @@ public class HomeFragment extends BaseTabFragment {
             new ESNetworkAccessor.S3UploadAllDataTask().execute(ESNetworkAccessor.rawDir);
         });
 
+      /*  Button questionnaireButton = homeView.findViewById(R.id.questionnaireButton);
+        questionnaireButton.setOnClickListener(v -> {
+            Intent questions = new Intent(Objects.requireNonNull(getActivity()).getApplicationContext(), QuestionActivity.class);
+            //you have to pass as an extra the json string.
+            questions.putExtra("json_questions", loadQuestionnaireJson());
+            startActivityForResult(questions, QUESTIONNAIRE_REQUEST);
+
+        });*/
+
+
         return homeView;
+    }
+
+    //json stored in the assets folder. but you can get it from wherever you like.
+    private String loadQuestionnaireJson()
+    {
+        try
+        {
+
+            InputStream is = Objects.requireNonNull(getActivity()).getApplicationContext().getAssets().open("questions_longsurvey.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            return new String(buffer, "UTF-8");
+        } catch (IOException ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
     }
 
 //    private void presentNumStoredExamples() {
@@ -185,4 +216,5 @@ public class HomeFragment extends BaseTabFragment {
 //        super.reactToFeedbackQueueSizeChangedEvent();
 //        presentFeedbackQueueCount();
 //    }
+
 }

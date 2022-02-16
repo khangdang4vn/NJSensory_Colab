@@ -1,4 +1,4 @@
-package edu.ucsd.calab.extrasensory.questionnaire;
+package edu.ucsd.calab.extrasensory.questionnaire.questionmodels;
 
 import android.os.Bundle;
 import android.os.Parcel;

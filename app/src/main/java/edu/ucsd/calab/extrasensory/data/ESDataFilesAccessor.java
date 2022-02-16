@@ -70,6 +70,26 @@ public class ESDataFilesAccessor {
         return dataFilesDir;
     }
 
+    public static File getQuestionnaireDir() throws IOException {
+        String state = Environment.getExternalStorageState();
+        if (!Environment.MEDIA_MOUNTED.equals(state)) {
+            Log.e(LOG_TAG,"!!! External storage is not mounted.");
+            throw new IOException("External storage is not mounted.");
+        }
+
+        File dataFilesDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "//NJSensory//","health_survey");
+//        File dataFilesDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),LABEL_DATA_DIRNAME);
+        if (!dataFilesDir.exists()) {
+            // Create the directory:
+            if (!dataFilesDir.mkdirs()) {
+                Log.e(LOG_TAG,"!!! Failed creating directory: " + dataFilesDir.getPath());
+                throw new IOException("Failed creating directory: " + dataFilesDir.getPath());
+            }
+        }
+
+        return dataFilesDir;
+    }
+
     /**
      * Write the server predictions for an instance to a textual file that will be available to other apps.
      * @param timestamp The timestamp of the instance

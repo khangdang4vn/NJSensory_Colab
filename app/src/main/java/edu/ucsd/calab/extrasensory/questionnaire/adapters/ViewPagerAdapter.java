@@ -1,10 +1,10 @@
-package com.spk.questionnaire.questions.adapters;
-
-import java.util.ArrayList;
+package edu.ucsd.calab.extrasensory.questionnaire.adapters;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+
+import java.util.ArrayList;
 
 public class ViewPagerAdapter extends FragmentPagerAdapter
 {

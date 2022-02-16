@@ -1,37 +1,32 @@
-package edu.ucsd.calab.extrasensory.questionnaire.widgets;
+package edu.ucsd.calab.extrasensory.questionnaire;
 
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.ucsd.calab.extrasensory.ESApplication;
 import edu.ucsd.calab.extrasensory.R;
-import edu.ucsd.calab.extrasensory.data.ESActivity;
-import edu.ucsd.calab.extrasensory.data.ESContinuousActivity;
-import edu.ucsd.calab.extrasensory.data.ESDatabaseAccessor;
-import edu.ucsd.calab.extrasensory.data.ESTimestamp;
+import edu.ucsd.calab.extrasensory.data.ESDataFilesAccessor;
+import edu.ucsd.calab.extrasensory.network.ESNetworkAccessor;
 import edu.ucsd.calab.extrasensory.questionnaire.adapters.ViewPagerAdapter;
 import edu.ucsd.calab.extrasensory.questionnaire.database.AppDatabase;
 import edu.ucsd.calab.extrasensory.questionnaire.fragments.CheckBoxesFragment;
@@ -41,7 +36,10 @@ import edu.ucsd.calab.extrasensory.questionnaire.qdb.QuestionWithChoicesEntity;
 import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.AnswerOptions;
 import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.QuestionDataModel;
 import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.QuestionsItem;
-import edu.ucsd.calab.extrasensory.sensors.ESSensorManager;
+import io.reactivex.Completable;
+import io.reactivex.CompletableObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -67,6 +65,9 @@ public class QuestionActivity extends AppCompatActivity {
     private String totalQuestions = "1";
     private Gson gson;
     private ViewPager questionsViewPager;
+
+    List<QuestionEntity> questionsList = new ArrayList<>();
+    List<QuestionWithChoicesEntity> questionsWithAllChoicesList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -258,5 +259,102 @@ public class QuestionActivity extends AppCompatActivity {
         Spannable spanText = new SpannableString(questionPosition);
         spanText.setSpan(new RelativeSizeSpan(0.7f), slashPosition, questionPosition.length(), 0);
         questionPositionTV.setText(spanText);
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        getResultFromDatabase();
+    }
+
+    /*After, getting all result you can/must delete the saved results
+    although we are clearing the Tables as soon we start the QuestionActivity.*/
+    private void getResultFromDatabase()
+    {
+        Completable.fromAction(() -> {
+            questionsList = appDatabase.getQuestionDao().getAllQuestions();
+            questionsWithAllChoicesList = appDatabase.getQuestionChoicesDao().getAllQuestionsWithChoices("1");
+        }).subscribeOn(io.reactivex.schedulers.Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver()
+                {
+                    @Override
+                    public void onSubscribe(Disposable d)
+                    {
+
+                    }
+
+                    @Override
+                    public void onComplete()
+                    {
+                        makeJsonDataToMakeResultView();
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+
+                    }
+                });
+    }
+
+    /*Here, JSON got created and send to make Result View as per Project requirement.
+     * Alternatively, in your case, you make Network-call to send the result to back-end.*/
+    private void makeJsonDataToMakeResultView()
+    {
+        try
+        {
+            JSONArray questionAndAnswerArray = new JSONArray();
+            int questionsSize = questionsList.size();
+            if (questionsSize > 0)
+            {
+                for (int i = 0; i < questionsSize; i++)
+                {
+                    JSONObject questionName = new JSONObject();
+                    questionName.put("question", questionsList.get(i).getQuestion());
+                    //questionName.put("question_id", String.valueOf(questionsList.get(i).getQuestionId()));
+                    String questionId = String.valueOf(questionsList.get(i).getQuestionId());
+
+                    JSONArray answerChoicesList = new JSONArray();
+                    int selectedChoicesSize = questionsWithAllChoicesList.size();
+                    for (int k = 0; k < selectedChoicesSize; k++)
+                    {
+                        String questionIdOfChoice = questionsWithAllChoicesList.get(k).getQuestionId();
+                        if (questionId.equals(questionIdOfChoice))
+                        {
+                            JSONObject selectedChoice = new JSONObject();
+                            selectedChoice.put("answer_choice", questionsWithAllChoicesList.get(k).getAnswerChoice());
+                            //selectedChoice.put("answer_id", questionsWithAllChoicesList.get(k).getAnswerChoiceId());
+                            answerChoicesList.put(selectedChoice);
+                        }
+                    }
+                    questionName.put("selected_answer", answerChoicesList);
+
+                    questionAndAnswerArray.put(questionName);
+                }
+            }
+            // Save data to file:
+            String dataStr = questionAndAnswerArray.toString();
+            writeFile(dataStr);
+
+        } catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeFile(String content) {
+        FileOutputStream fos;
+        try {
+            File outFile = new File(ESDataFilesAccessor.getQuestionnaireDir(), "questionnaire" + ".json");
+            fos = new FileOutputStream(outFile);
+            fos.write(content.getBytes());
+            fos.close();
+            new ESNetworkAccessor.S3UploadFileTask().execute(outFile);
+        } catch (IOException e) {
+            Log.e("AnswerActivity", e.getMessage());
+        }
+
     }
 }

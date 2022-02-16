@@ -5,4 +5,9 @@
     <color name="secondaryColor">#3c3c3c</color>
     <color name="secondaryDarkColor">#161616</color>
     <color name="colorOnPrimary">#ffffff</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorPrimaryDark">#00796B</color>
+    <color name="colorPrimary">#009688</color>
+    <color name="grey">#585858</color>
+    <color name="divider">#cacaca</color>
 </resources>

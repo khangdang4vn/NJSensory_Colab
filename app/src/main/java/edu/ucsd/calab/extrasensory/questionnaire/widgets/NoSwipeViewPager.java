@@ -1,9 +1,10 @@
-package com.spk.questionnaire.questions.widgets;
+package edu.ucsd.calab.extrasensory.questionnaire.widgets;
 
 import android.content.Context;
-import androidx.viewpager.widget.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+
+import androidx.viewpager.widget.ViewPager;
 
 public class NoSwipeViewPager extends ViewPager
 {

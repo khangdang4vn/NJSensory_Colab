@@ -1,8 +1,9 @@
-package edu.ucsd.calab.extrasensory.questionnaire.widgets;
+package edu.ucsd.calab.extrasensory.questionnaire;
 
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import edu.ucsd.calab.extrasensory.R;
+import edu.ucsd.calab.extrasensory.data.ESDataFilesAccessor;
+import edu.ucsd.calab.extrasensory.data.ESTimestamp;
 import edu.ucsd.calab.extrasensory.questionnaire.database.AppDatabase;
 import edu.ucsd.calab.extrasensory.questionnaire.qdb.QuestionEntity;
 import edu.ucsd.calab.extrasensory.questionnaire.qdb.QuestionWithChoicesEntity;
@@ -22,9 +25,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.ucsd.calab.extrasensory.sensors.ESSensorManager;
 import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -127,7 +134,9 @@ public class AnswersActivity extends AppCompatActivity
                     questionAndAnswerArray.put(questionName);
                 }
             }
-
+            // Save data to file:
+            String dataStr = questionAndAnswerArray.toString();
+            writeFile(dataStr);
             questionsAnswerView(questionAndAnswerArray);
 
         } catch (JSONException e)
@@ -135,6 +144,23 @@ public class AnswersActivity extends AppCompatActivity
             e.printStackTrace();
         }
     }
+
+    private void writeFile(String content) {
+        FileOutputStream fos;
+        try {
+            File outFile = new File(ESDataFilesAccessor.getLabelFilesDir(), "questionnaire" + ".json");
+            fos = new FileOutputStream(outFile);
+            fos.write(content.getBytes());
+            fos.close();
+        } catch (IOException e) {
+            Log.e("AnswerActivity", e.getMessage());
+        }
+
+    }
+  /*  private ESTimestamp _timestamp;
+    private String currentZipFilename() {
+        return ESSensorManager.getZipFilename(_timestamp);
+    }*/
 
     private void questionsAnswerView(JSONArray questionsWithAnswerArray)
     {

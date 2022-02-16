@@ -1,4 +1,4 @@
-package com.spk.questionnaire.questions.questionmodels;
+package edu.ucsd.calab.extrasensory.questionnaire.questionmodels;
 
 import com.google.gson.annotations.SerializedName;
 

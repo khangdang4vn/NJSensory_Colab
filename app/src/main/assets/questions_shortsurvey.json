@@ -1,0 +1,104 @@
+{
+  "data": {
+    "questions": [
+      {
+        "id": 1,
+        "question_type_id": 2,
+        "question_type_name": "Radio",
+        "question_name": "Question 1/ Over the last 2 weeks, how often have you been bothered by Feeling nervous, anxious, or on edge:",
+        "question_item": [
+          {
+            "answer_id": "11",
+            "name": "Not at all"
+          },
+          {
+            "answer_id": "12",
+            "name": "Several days"
+          },
+          {
+            "answer_id": "13",
+            "name": "More than half the days"
+          },
+          {
+            "answer_id": "14",
+            "name": "Nearly every day"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "question_type_id": 2,
+        "question_type_name": "Radio",
+        "question_name": "Question 2/ Over the last 2 weeks, how often have you been bothered by Not being able to stop or control worrying:",
+        "question_item": [
+          {
+            "answer_id": "21",
+            "name": "Not at all"
+          },
+          {
+            "answer_id": "22",
+            "name": "Several days"
+          },
+          {
+            "answer_id": "23",
+            "name": "More than half the days"
+          },
+          {
+            "answer_id": "24",
+            "name": "Nearly every day"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "question_type_id": 2,
+        "question_type_name": "Radio",
+        "question_name": "Question 8/ Over the last 2 weeks, how often have you been bothered by Having little interest or pleasure in doing things:",
+        "question_item": [
+          {
+            "answer_id": "81",
+            "name": "Not at all"
+          },
+          {
+            "answer_id": "82",
+            "name": "Several days"
+          },
+          {
+            "answer_id": "83",
+            "name": "More than half the days"
+          },
+          {
+            "answer_id": "84",
+            "name": "Nearly every day"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "question_type_id": 2,
+        "question_type_name": "Radio",
+        "question_name": "Question 9/ Over the last 2 weeks, how often have you been bothered by Feeling down, depressed, or hopeless:",
+        "question_item": [
+          {
+            "answer_id": "91",
+            "name": "Not at all"
+          },
+          {
+            "answer_id": "92",
+            "name": "Several days"
+          },
+          {
+            "answer_id": "93",
+            "name": "More than half the days"
+          },
+          {
+            "answer_id": "94",
+            "name": "Nearly every day"
+          }
+        ]
+      }
+    ]
+  },
+  "status": true,
+  "message": "The data was fetched successfully"
+}

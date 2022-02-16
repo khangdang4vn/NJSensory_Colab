@@ -52,8 +52,10 @@ import kotlin.collections.ArrayList
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.view.Menu
 import androidx.core.content.ContextCompat.startActivity
+import com.polar.sdk.impl.BDBleApiImpl
 import edu.ucsd.calab.extrasensory.data.*
 import edu.ucsd.calab.extrasensory.sensors.ESSensorManager
+import edu.ucsd.calab.extrasensory.sensors.polarandroidblesdk.PolarActivity.Companion.api
 import edu.ucsd.calab.extrasensory.sensors.polarandroidblesdk.PolarActivity.Companion.isPolarConnected
 import edu.ucsd.calab.extrasensory.ui.BaseActivity
 import io.reactivex.rxjava3.subjects.ReplaySubject
@@ -106,7 +108,7 @@ class PolarActivity : BaseActivity() {
         /* Function to let app know if a Polar device is connected */
         @JvmStatic
         fun isPolarConnected(): Boolean {
-            Log.i(TAG, "Polar is " + if (deviceConnected) "not connected" else "connected")
+            Log.i(TAG, "Polar is " + if (deviceConnected) "connected" else "not connected")
             return deviceConnected
         }
         @JvmStatic
@@ -115,7 +117,7 @@ class PolarActivity : BaseActivity() {
                     .doFinally{
                         // close the file once stream is either completed, error has stop the stream or stream is disposed
                         polarhrMeasurements[POLAR_HR] = polarhrList
-                        Log.d(
+                        Log.i(
                             TAG,
                             "doFinally: $polarhrMeasurements "
                         )
@@ -123,26 +125,45 @@ class PolarActivity : BaseActivity() {
                     .subscribe(
                         { polarBroadcastData: PolarHrBroadcastData ->
                             polarhrList += polarBroadcastData.hr
-                            Log.d(
+                            Log.i(
                                 TAG,
                                 "HR BROADCAST ${polarBroadcastData.polarDeviceInfo.deviceId} " +
                                         "HR: ${polarBroadcastData.hr} " +
                                         "batt: ${polarBroadcastData.batteryStatus} " +
-                                        "polarhrListCollected: $polarhrList " +
-                                        "publish:  "
+                                        "polarhrListCollected: $polarhrList "
                             )
                         },
                         { error: Throwable ->
-
+                            showToast("Broadcast listener failed. Reason $error. Please try again or check your Polar device.")
                             Log.e(TAG, "Broadcast listener failed. Reason $error")
                         },
                         { Log.d(TAG, "complete") }
                     )
         }
         @JvmStatic
-        fun completeHRBroadcast() {
-            broadcastDisposable.dispose()
-            Log.d(TAG, "complete")
+        fun startHRBackground() {
+            api.setApiCallback(object : PolarBleApiCallback() {
+                override fun hrNotificationReceived(identifier: String, data: PolarHrData) {
+                    polarhrList += data.hr
+                    Log.d(
+                        TAG,
+                        "HR value: ${data.hr} rrsMs: ${data.rrsMs} rr: ${data.rrs} contact: ${data.contactStatus} , ${data.contactStatusSupported}"
+                    )
+                }
+            })
+        }
+
+        private fun showToast(s: String) {
+            showToast(s)
+
+        }
+
+        @JvmStatic
+        fun completeHRBroadcast(): HashMap<String, ArrayList<Int>> {
+            //broadcastDisposable.dispose()
+            polarhrMeasurements[POLAR_HR] = polarhrList
+            Log.d(TAG, "complete, doFinally: $polarhrMeasurements ")
+            return polarhrMeasurements
         }
         @JvmStatic
         fun cleanPolarMeasurements() {
@@ -214,7 +235,7 @@ class PolarActivity : BaseActivity() {
         PolarBleApiDefaultImpl.defaultImplementation(this, PolarBleApi.ALL_FEATURES)
     }
 
-    private lateinit var broadcastDisposable: Disposable
+    //private lateinit var broadcastDisposable: Disposable
     private var scanDisposable: Disposable? = null
     private var autoConnectDisposable: Disposable? = null
     private var ecgDisposable: Disposable? = null
@@ -867,20 +888,25 @@ class PolarActivity : BaseActivity() {
         }
     }
 
-   /* public override fun onPause() {
-        super.onPause()
-        api.backgroundEntered()
-    }*/
+   // public override fun onStop() {
+   //     super.onStop()
+   //     api.backgroundEntered()
+   //  }
 
-  /*  public override fun onResume() {
-        super.onResume()
-        api.foregroundEntered()
-    }*/
+    //public override fun onPause() {
+    //    super.onPause()
+    //    api.backgroundEntered()
+   // }
 
-    //public override fun onDestroy() {
-    //    super.onDestroy()
-    //    api.shutDown()
+   // public override fun onResume() {
+     //   super.onResume()
+       // api.foregroundEntered()
     //}
+
+   // public override fun onDestroy() {
+    //    super.onDestroy()
+   //     api.shutDown()
+   // }
 
     private fun toggleButtonDown(button: Button, text: String? = null) {
         toggleButton(button, true, text)

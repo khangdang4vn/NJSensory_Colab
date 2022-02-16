@@ -3,16 +3,26 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../layout/custom_preview.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-mdpi/ic_questionnaire_arrow_back.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_access_time_black.xml" value="0.14114583333333333" />
         <entry key="app/src/main/res/drawable/ic_android.xml" value="0.16041666666666668" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.14114583333333333" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.1375" />
+        <entry key="app/src/main/res/layout/activity_polar.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_questionnaire.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_questionnaire_answers.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_questionnaire_question.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_setting.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_history.xml" value="0.1375" />
+        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.1" />
         <entry key="app/src/main/res/layout/main.xml" value="0.15520833333333334" />
         <entry key="app/src/main/res/layout/progress_view.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/questionnaire_footer.xml" value="0.1" />
         <entry key="app/src/main/res/menu/menu_main.xml" value="0.13645833333333332" />
       </map>
     </option>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="1.8" project-jdk-type="JavaSDK" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_15" project-jdk-name="1.8" project-jdk-type="JavaSDK" />
 </project>

@@ -31,34 +31,34 @@
                 android:id="@+id/questionToolbarTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:text="Questions"
                 android:layout_alignParentStart="true"
-                android:ellipsize="marquee"
                 android:layout_toStartOf="@+id/questionPositionTV"
+                android:ellipsize="marquee"
+                android:gravity="center_vertical"
+                android:text="Survey"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textSize="20sp"
-                />
+                android:textColor="#000000"
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/questionPositionTV"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_alignParentEnd="true"
-                android:paddingEnd="16dp"
-                android:paddingStart="16dp"
                 android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                android:textColor="#000000"
                 android:textSize="18sp"
-                tools:text="05/10"
-                />
+                tools:text="05/10" />
 
         </RelativeLayout>
 
 
     </androidx.appcompat.widget.Toolbar>
 
-    <com.spk.questionnaire.questions.widgets.NoSwipeViewPager
+    <edu.ucsd.calab.extrasensory.questionnaire.widgets.NoSwipeViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

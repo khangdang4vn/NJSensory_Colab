@@ -1,4 +1,4 @@
-package com.spk.questionnaire.questions.qdb;
+package edu.ucsd.calab.extrasensory.questionnaire.qdb;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;

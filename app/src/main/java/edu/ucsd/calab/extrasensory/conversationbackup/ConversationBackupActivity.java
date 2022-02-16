@@ -187,7 +187,7 @@ public class ConversationBackupActivity extends BaseCBActivity {
                 .equals(BuildConfig.VERSION_NAME)) {
             showDialog(dfEula);
         }
-        setContentView(R.layout.main);
+        setContentView(R.layout.backup_activity);
 
         specNumBackupEditView = (EditText) findViewById(R.id.specific_numbers_to_backup_edit);
         exitAppButton = (Button) findViewById(R.id.exit_app);
