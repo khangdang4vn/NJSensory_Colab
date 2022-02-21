@@ -5,13 +5,12 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,10 +34,8 @@ import java.util.Objects;
 
 import edu.ucsd.calab.extrasensory.ESApplication;
 import edu.ucsd.calab.extrasensory.R;
-import edu.ucsd.calab.extrasensory.conversationbackup.ArchivesActivity;
 import edu.ucsd.calab.extrasensory.conversationbackup.ConversationBackupActivity;
-import edu.ucsd.calab.extrasensory.questionnaire.AlarmReceiver;
-import edu.ucsd.calab.extrasensory.questionnaire.QuestionActivity;
+import edu.ucsd.calab.extrasensory.questionnaire.QuestionsActivity;
 import edu.ucsd.calab.extrasensory.sensors.ESSensorManager;
 import edu.ucsd.calab.extrasensory.sensors.polarandroidblesdk.PolarActivity;
 
@@ -58,7 +55,8 @@ public class MainActivity extends BaseActivity {
 
     private final int MULTIPLE_PERMISSIONS_REQUEST_CODE = 1;
 
-    private static int alarm_code = 1;
+    private SharedPreferences pref;
+    private SharedPreferences.Editor editor;
 
     private static final int QUESTIONNAIRE_REQUEST = 2018;
 
@@ -113,47 +111,113 @@ public class MainActivity extends BaseActivity {
             //}
         //});
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 9);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        // Check if current time is smaller than cal time
-        // otherwise notifications will come same day.
-        //if (System.currentTimeMillis() <= calendar.getTimeInMillis()) {
-            if (alarm_code == 1) {
-            AlarmManager alarmManager=(AlarmManager)getSystemService(Context.ALARM_SERVICE);
-            Intent questions;
-            PendingIntent pendingIntentlongsurvey = PendingIntent.getBroadcast(getApplicationContext(),1, questions = new Intent(getApplicationContext(), QuestionActivity.class),PendingIntent.FLAG_IMMUTABLE);
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+        // Get today and clear time of day
+        // Then: Get start of this week
+        Calendar start_of_this_week = Calendar.getInstance();
+        start_of_this_week.set(Calendar.HOUR_OF_DAY, 0);
+        start_of_this_week.clear(Calendar.MINUTE);
+        start_of_this_week.clear(Calendar.SECOND);
+        start_of_this_week.clear(Calendar.MILLISECOND);
+        start_of_this_week.set(Calendar.DAY_OF_WEEK, start_of_this_week.getFirstDayOfWeek());
+
+        // Get today and clear time of day
+        // Then: Get start of next week
+        Calendar start_of_next_week = Calendar.getInstance();
+        start_of_next_week.set(Calendar.HOUR_OF_DAY, 0);
+        start_of_next_week.clear(Calendar.MINUTE);
+        start_of_next_week.clear(Calendar.SECOND);
+        start_of_next_week.clear(Calendar.MILLISECOND);
+        start_of_next_week.set(Calendar.DAY_OF_WEEK, start_of_next_week.getFirstDayOfWeek());
+        start_of_next_week.add(Calendar.WEEK_OF_YEAR, 1);
+
+        pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+        editor = pref.edit();
+
+        //GET THE LAST CHECKED "NEXT WEEK" FROM SHARED PREFERENCES
+        int lastCheck = pref.getInt("lastcheck", 0);
+
+        int week_order = pref.getInt("week_order", 0);
+
+        //GET THE NUMBER OF TIMES IN THIS WEEK THE ACTIVITY WAS OPENED FROM SHARED PREFERENCES
+        int count_1 = pref.getInt("count_1", 0);
+
+        // IF IT IS A NEW WEEK START COUNTING FROM 0 AGAIN
+        Calendar next_week = Calendar.getInstance();
+        next_week.set(Calendar.HOUR_OF_DAY, 0);
+        next_week.clear(Calendar.MINUTE);
+        next_week.clear(Calendar.SECOND);
+        next_week.clear(Calendar.MILLISECOND);
+        next_week.set(Calendar.DAY_OF_WEEK, next_week.getFirstDayOfWeek());
+        next_week.add(Calendar.WEEK_OF_YEAR, 1);
+        int nextweek = (int) next_week.getTimeInMillis();
+        int today = (int) System.currentTimeMillis();
+        boolean ret = ((lastCheck == 0) || (today > lastCheck));
+        editor.putInt("lastcheck", nextweek);
+        editor.commit();
+        if(ret){
+            count_1 = 0;
+            week_order++;
+            editor.putInt("week_order", week_order);
+            editor.commit();
+        }
+
+        if(week_order > 4){
+            week_order = 1;
+            editor.putInt("week_order", week_order);
+            editor.commit();
+        }
+
+        if (count_1 < 1) {
+            if(week_order == 1) {
+                Intent questions = new Intent(getApplicationContext(), QuestionsActivity.class);
+                questions.putExtra("json_questions", loadlongQuestionnaireJson());
+                startActivityForResult(questions, QUESTIONNAIRE_REQUEST);
+                count_1++;
+                editor.putInt("count_1", count_1);
+                editor.commit();
+            }
+            if((week_order == 2) || (week_order == 3) || (week_order == 4)) {
+                Intent questions = new Intent(getApplicationContext(), QuestionsActivity.class);
+                questions.putExtra("json_questions", loadshortQuestionnaireJson());
+                startActivityForResult(questions, QUESTIONNAIRE_REQUEST);
+                count_1++;
+                editor.putInt("count_1", count_1);
+                editor.commit();
+            }
+        }
+
+      /*      if (alarm_code == 1) {
+                Intent questions = new Intent(getApplicationContext(), QuestionActivity.class);
+                AlarmManager alarmManager=(AlarmManager)getSystemService(Context.ALARM_SERVICE);
+                PendingIntent pendingIntentlongsurvey = PendingIntent.getBroadcast(getApplicationContext(),1, questions ,PendingIntent.FLAG_IMMUTABLE);
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     calendar.getTimeInMillis(),
                     pendingIntentlongsurvey);
-            //you have to pass as an extra the json string.
+            you have to pass as an extra the json string.
             questions.putExtra("json_questions", loadQuestionnaireJson());
             startActivityForResult(questions, QUESTIONNAIRE_REQUEST);
-            //SyncAlarm(context, calendar.getTimeInMillis());
+            SyncAlarm(context, calendar.getTimeInMillis());
                 alarm_code += 1;
-    //    }
-    }
+
 
         AlarmManager alarmManager=(AlarmManager)getSystemService(Context.ALARM_SERVICE);
         Intent intent=new Intent(getApplicationContext(), AlarmReceiver.class);
         PendingIntent pendingIntent=PendingIntent.getActivity(getApplicationContext(),1,intent,PendingIntent.FLAG_IMMUTABLE);
         if (Build.VERSION.SDK_INT >= 23) {
-            // Wakes up the device in Doze Mode
+             Wakes up the device in Doze Mode
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, 6000, // time in millis
                     pendingIntent);
         } else if (Build.VERSION.SDK_INT >= 19) {
-            // Wakes up the device in Idle Mode
+             Wakes up the device in Idle Mode
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, 6000, pendingIntent);
         } else {
-            // Old APIs
+             Old APIs
             alarmManager.set(AlarmManager.RTC_WAKEUP, 6000, pendingIntent);
         }
 
-        //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,6000,300000,pendingIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,6000,300000,pendingIntent);
 
-        //Intent questions = new Intent(getApplicationContext(), QuestionActivity.class);
+        Intent questions = new Intent(getApplicationContext(), QuestionActivity.class); */
 
         FragmentTabHost _fragmentTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         _fragmentTabHost.setup(getApplicationContext(), getSupportFragmentManager(), android.R.id.tabcontent);
@@ -434,7 +498,7 @@ public class MainActivity extends BaseActivity {
     }
 
     //json stored in the assets folder. but you can get it from wherever you like.
-    private String loadQuestionnaireJson()
+    private String loadlongQuestionnaireJson()
     {
         try
         {
@@ -451,5 +515,39 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    //json stored in the assets folder. but you can get it from wherever you like.
+    private String loadshortQuestionnaireJson()
+    {
+        try
+        {
+            InputStream is = Objects.requireNonNull(getApplicationContext().getAssets().open("questions_shortsurvey.json"));
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            return new String(buffer, "UTF-8");
+        } catch (IOException ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+    }
 
+ /*   // GET THE CURRENT DAY IN THE MONTH AND COMPARE IT WITH THE LAST CHECKED
+    public boolean isNewWeek() {
+        Calendar next_week = Calendar.getInstance();
+        next_week.set(Calendar.HOUR_OF_DAY, 0);
+        next_week.clear(Calendar.MINUTE);
+        next_week.clear(Calendar.SECOND);
+        next_week.clear(Calendar.MILLISECOND);
+        next_week.set(Calendar.DAY_OF_WEEK, next_week.getFirstDayOfWeek());
+        next_week.add(Calendar.WEEK_OF_YEAR, 1);
+        int nextweek = (int) next_week.getTimeInMillis();
+        int today = (int) System.currentTimeMillis();
+        boolean ret = lastCheck == 0 || today > lastcheck;
+        lastCheck = nextweek;
+        editor.putInt("lastcheck", nextweek);
+        editor.commit();
+        return ret;
+    }*/
 }

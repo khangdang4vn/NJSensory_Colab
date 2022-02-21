@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
-import androidx.fragment.app.FragmentActivity;
-import androidx.activity.ComponentActivity;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -19,15 +17,10 @@ import edu.ucsd.calab.extrasensory.data.ESActivity;
 import edu.ucsd.calab.extrasensory.data.ESDatabaseAccessor;
 import edu.ucsd.calab.extrasensory.data.ESLabelStruct;
 import edu.ucsd.calab.extrasensory.data.ESTimestamp;
-import edu.ucsd.calab.extrasensory.questionnaire.QuestionActivity;
 import edu.ucsd.calab.extrasensory.sensors.ESSensorManager;
 import edu.ucsd.calab.extrasensory.ui.MainActivity;
 
 import static edu.ucsd.calab.extrasensory.ESApplication.CHANNEL_ID;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Objects;
 
 /**
  * An {@link JobIntentService} subclass for handling asynchronous task requests in

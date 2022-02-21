@@ -1,5 +1,8 @@
 package edu.ucsd.calab.extrasensory.questionnaire;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -7,6 +10,7 @@ import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -26,6 +30,8 @@ import java.util.List;
 
 import edu.ucsd.calab.extrasensory.R;
 import edu.ucsd.calab.extrasensory.data.ESDataFilesAccessor;
+import edu.ucsd.calab.extrasensory.data.ESSettings;
+import edu.ucsd.calab.extrasensory.data.ESTimestamp;
 import edu.ucsd.calab.extrasensory.network.ESNetworkAccessor;
 import edu.ucsd.calab.extrasensory.questionnaire.adapters.ViewPagerAdapter;
 import edu.ucsd.calab.extrasensory.questionnaire.database.AppDatabase;
@@ -36,6 +42,7 @@ import edu.ucsd.calab.extrasensory.questionnaire.qdb.QuestionWithChoicesEntity;
 import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.AnswerOptions;
 import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.QuestionDataModel;
 import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.QuestionsItem;
+import edu.ucsd.calab.extrasensory.sensors.ESSensorManager;
 import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -55,7 +62,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
  * http://extrasensory.ucsd.edu/ExtraSensoryApp
  * ========================================
  */
-public class QuestionActivity extends AppCompatActivity {
+public class QuestionsActivity extends AppCompatActivity {
 
     final ArrayList<Fragment> fragmentArrayList = new ArrayList<>();
     List<QuestionsItem> questionsItems = new ArrayList<>();
@@ -77,7 +84,7 @@ public class QuestionActivity extends AppCompatActivity {
 
         toolBarInit();
 
-        appDatabase = AppDatabase.getAppDatabase(QuestionActivity.this);
+        appDatabase = AppDatabase.getAppDatabase(QuestionsActivity.this);
         gson = new Gson();
 
         if (getIntent().getExtras() != null)
@@ -239,7 +246,15 @@ public class QuestionActivity extends AppCompatActivity {
     {
         if (questionsViewPager.getCurrentItem() == 0)
         {
-            super.onBackPressed();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this).
+                    setIcon(R.drawable.ic_launcher).setMessage("Please complete the questionnaire").
+                    setTitle("NJSensory").setNegativeButton(R.string.ok_button_text,new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.create().show();
         } else
         {
             int item = questionsViewPager.getCurrentItem() - 1;
@@ -347,7 +362,7 @@ public class QuestionActivity extends AppCompatActivity {
     private void writeFile(String content) {
         FileOutputStream fos;
         try {
-            File outFile = new File(ESDataFilesAccessor.getQuestionnaireDir(), "questionnaire" + ".json");
+            File outFile = new File(ESDataFilesAccessor.getQuestionnaireDir(), "questionnaire-" + currentZipFilename() + ".json");
             fos = new FileOutputStream(outFile);
             fos.write(content.getBytes());
             fos.close();
@@ -355,6 +370,15 @@ public class QuestionActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e("AnswerActivity", e.getMessage());
         }
-
     }
+
+    private static String getZipFilename(long timestamp) {
+        return timestamp + "-" + ESSettings.uuid();
+    }
+
+    private String currentZipFilename() {
+        long unixTime = System.currentTimeMillis() / 1000L;
+        return getZipFilename(unixTime);
+    }
+
 }

@@ -61,8 +61,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="stopService"
-            android:text="Close App"
-            tools:ignore="OnClick" />
+            android:text="@string/close_app"
+            tools:ignore="OnClick,UsingOnClickInXml" />
 
     </LinearLayout>
 

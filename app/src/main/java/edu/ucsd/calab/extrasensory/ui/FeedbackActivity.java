@@ -375,6 +375,7 @@ public class FeedbackActivity extends BaseActivity {
                     boolean emptyMain = (_labelStruct._mainActivity == null) || (_labelStruct._mainActivity.equals(getString(R.string.not_sure_dummy_label)));
                     boolean emptySec = (_labelStruct._secondaryActivities == null) || (_labelStruct._secondaryActivities.length <= 0);
                     boolean emptyMood = (_labelStruct._moods == null) || (_labelStruct._moods.length <= 0);
+                    boolean emptyDuration = (_labelStruct._mainActivity == null) || (_labelStruct._mainActivity.equals(getString(R.string.not_sure_dummy_label)));
                     if (emptyMain && emptySec && emptyMood) {
                         // custom dialog
                         final Dialog dialog = new Dialog(context);

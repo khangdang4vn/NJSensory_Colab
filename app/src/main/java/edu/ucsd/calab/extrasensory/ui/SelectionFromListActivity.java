@@ -81,7 +81,7 @@ public class SelectionFromListActivity extends BaseActivity {
     public static final int LIST_TYPE_VALID_FOR = 3;
 
     public static String[] getValidForValues() {
-        return new String[]{"1 minute","2 minutes","3 minutes","4 minutes","5 minutes",
+        return new String[]{"not sure","1 minute","2 minutes","3 minutes","4 minutes","5 minutes",
                 "10 minutes","15 minutes","20 minutes","25 minutes","30 minutes",
                 "35 minutes","40 minutes","45 minutes","50 minutes","55 minutes","60 minutes",
                 "70 minutes","80 minutes","90 minutes","100 minutes","110 minutes","120 minutes",
@@ -196,6 +196,15 @@ public class SelectionFromListActivity extends BaseActivity {
                 break;
             case LIST_TYPE_VALID_FOR:
                 _labelChoices = getValidForValues();
+                if (inputParameters.hasExtra(ADD_NOT_SURE_LABEL_KEY)) {
+                    // Add another pseudo-label "don't remember":
+                    String[] newArray = new String[_labelChoices.length + 1];
+                    for (int i=0; i < _labelChoices.length; i++) {
+                        newArray[i] = _labelChoices[i];
+                    }
+                    newArray[_labelChoices.length] = getString(R.string.not_sure_dummy_label);
+                    _labelChoices = newArray;
+                }
                 _allowMultiSelection = false;
                 _useIndex = false;
                 _allLabelsSectionHeader = VALID_FOR_HEADER;

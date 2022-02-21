@@ -18,7 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import edu.ucsd.calab.extrasensory.R;
-import edu.ucsd.calab.extrasensory.questionnaire.QuestionActivity;
+import edu.ucsd.calab.extrasensory.questionnaire.QuestionsActivity;
 import edu.ucsd.calab.extrasensory.questionnaire.database.AppDatabase;
 import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.AnswerOptions;
 import edu.ucsd.calab.extrasensory.questionnaire.questionmodels.QuestionsItem;
@@ -70,7 +70,7 @@ public class RadioBoxesFragment extends Fragment
         radioGroupForChoices = rootView.findViewById(R.id.radioGroupForChoices);
 
         nextOrFinishButton.setOnClickListener(v -> {
-            if (currentPagePosition == ((QuestionActivity) mContext).getTotalQuestionsSize())
+            if (currentPagePosition == ((QuestionsActivity) mContext).getTotalQuestionsSize())
             {
                 /* Here, You go back from where you started OR If you want to go next Activity just change the Intent*/
                 Intent returnIntent = new Intent();
@@ -79,7 +79,7 @@ public class RadioBoxesFragment extends Fragment
 
             } else
             {
-                ((QuestionActivity) mContext).nextQuestion();
+                ((QuestionsActivity) mContext).nextQuestion();
             }
         });
         //previousButton.setOnClickListener(view -> mContext.onBackPressed());
@@ -252,7 +252,7 @@ public class RadioBoxesFragment extends Fragment
 
         /* If the current question is last in the questionnaire then
         the "Next" button will change into "Finish" button*/
-        if (currentPagePosition == ((QuestionActivity) mContext).getTotalQuestionsSize())
+        if (currentPagePosition == ((QuestionsActivity) mContext).getTotalQuestionsSize())
         {
             nextOrFinishButton.setText(R.string.finish);
         } else

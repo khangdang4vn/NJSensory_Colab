@@ -23,7 +23,6 @@ import java.util.Objects;
 import edu.ucsd.calab.extrasensory.ESApplication;
 import edu.ucsd.calab.extrasensory.R;
 import edu.ucsd.calab.extrasensory.network.ESNetworkAccessor;
-import edu.ucsd.calab.extrasensory.questionnaire.QuestionActivity;
 import edu.ucsd.calab.extrasensory.sensors.polarandroidblesdk.PolarActivity;
 
 /**

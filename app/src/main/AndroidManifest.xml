@@ -100,7 +100,7 @@
                 android:value="edu.ucsd.calab.extrasensory.ui.MainActivity" />
         </activity>
         <activity
-            android:name=".questionnaire.QuestionActivity"
+            android:name=".questionnaire.QuestionsActivity"
             android:screenOrientation="fullSensor">
         </activity>
 

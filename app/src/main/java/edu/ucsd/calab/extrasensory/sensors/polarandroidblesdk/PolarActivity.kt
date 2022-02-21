@@ -228,7 +228,7 @@ class PolarActivity : BaseActivity() {
     }
 
     // ATTENTION! Replace with the device ID from your device.
-    private var deviceId = "A Polar Device"
+    private var deviceId = "Polar Device"
 
     private val api: PolarBleApi by lazy {
         // Notice PolarBleApi.ALL_FEATURES are enabled
@@ -872,10 +872,10 @@ class PolarActivity : BaseActivity() {
         return true
     } */
 
-    override fun onBackPressed() {
+   /* override fun onBackPressed() {
         val intent = Intent(this@PolarActivity, MainActivity::class.java)
         startActivity(intent)
-    }
+    }*/
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -898,10 +898,16 @@ class PolarActivity : BaseActivity() {
     //    api.backgroundEntered()
    // }
 
-   // public override fun onResume() {
-     //   super.onResume()
-       // api.foregroundEntered()
-    //}
+    public override fun onResume() {
+        super.onResume()
+        if (deviceConnected) {
+        val buttonText = getString(R.string.disconnect_from_device, deviceId)
+        toggleButtonDown(connectButton, buttonText)}
+        else {
+            val buttonText = getString(R.string.connect_to_device, deviceId)
+            toggleButtonUp(connectButton, buttonText)}
+        //api.foregroundEntered()
+    }
 
    // public override fun onDestroy() {
     //    super.onDestroy()
@@ -912,17 +918,17 @@ class PolarActivity : BaseActivity() {
         toggleButton(button, true, text)
     }
 
-    private fun toggleButtonDown(button: Button, @StringRes resourceId: Int) {
-        toggleButton(button, true, getString(resourceId))
-    }
+   // private fun toggleButtonDown(button: Button, @StringRes resourceId: Int) {
+   //     toggleButton(button, true, getString(resourceId))
+    //}
 
     private fun toggleButtonUp(button: Button, text: String? = null) {
         toggleButton(button, false, text)
     }
 
-    private fun toggleButtonUp(button: Button, @StringRes resourceId: Int) {
-        toggleButton(button, false, getString(resourceId))
-    }
+   // private fun toggleButtonUp(button: Button, @StringRes resourceId: Int) {
+   //     toggleButton(button, false, getString(resourceId))
+   // }
 
     private fun toggleButton(button: Button, isDown: Boolean, text: String? = null) {
         if (text != null) button.text = text
