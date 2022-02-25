@@ -29,7 +29,6 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Objects;
 
 import edu.ucsd.calab.extrasensory.ESApplication;
@@ -54,9 +53,6 @@ public class MainActivity extends BaseActivity {
     private static final String LOG_TAG = "[MainActivity]";
 
     private final int MULTIPLE_PERMISSIONS_REQUEST_CODE = 1;
-
-    private SharedPreferences pref;
-    private SharedPreferences.Editor editor;
 
     private static final int QUESTIONNAIRE_REQUEST = 2018;
 
@@ -108,83 +104,10 @@ public class MainActivity extends BaseActivity {
                     -> dialog.dismiss());
             builder.create().show();
         }
+        scheduleQuestionnaire();
             //}
         //});
 
-        // Get today and clear time of day
-        // Then: Get start of this week
-        Calendar start_of_this_week = Calendar.getInstance();
-        start_of_this_week.set(Calendar.HOUR_OF_DAY, 0);
-        start_of_this_week.clear(Calendar.MINUTE);
-        start_of_this_week.clear(Calendar.SECOND);
-        start_of_this_week.clear(Calendar.MILLISECOND);
-        start_of_this_week.set(Calendar.DAY_OF_WEEK, start_of_this_week.getFirstDayOfWeek());
-
-        // Get today and clear time of day
-        // Then: Get start of next week
-        Calendar start_of_next_week = Calendar.getInstance();
-        start_of_next_week.set(Calendar.HOUR_OF_DAY, 0);
-        start_of_next_week.clear(Calendar.MINUTE);
-        start_of_next_week.clear(Calendar.SECOND);
-        start_of_next_week.clear(Calendar.MILLISECOND);
-        start_of_next_week.set(Calendar.DAY_OF_WEEK, start_of_next_week.getFirstDayOfWeek());
-        start_of_next_week.add(Calendar.WEEK_OF_YEAR, 1);
-
-        pref = getApplicationContext().getSharedPreferences("MyPref", 0);
-        editor = pref.edit();
-
-        //GET THE LAST CHECKED "NEXT WEEK" FROM SHARED PREFERENCES
-        int lastCheck = pref.getInt("lastcheck", 0);
-
-        int week_order = pref.getInt("week_order", 0);
-
-        //GET THE NUMBER OF TIMES IN THIS WEEK THE ACTIVITY WAS OPENED FROM SHARED PREFERENCES
-        int count_1 = pref.getInt("count_1", 0);
-
-        // IF IT IS A NEW WEEK START COUNTING FROM 0 AGAIN
-        Calendar next_week = Calendar.getInstance();
-        next_week.set(Calendar.HOUR_OF_DAY, 0);
-        next_week.clear(Calendar.MINUTE);
-        next_week.clear(Calendar.SECOND);
-        next_week.clear(Calendar.MILLISECOND);
-        next_week.set(Calendar.DAY_OF_WEEK, next_week.getFirstDayOfWeek());
-        next_week.add(Calendar.WEEK_OF_YEAR, 1);
-        int nextweek = (int) next_week.getTimeInMillis();
-        int today = (int) System.currentTimeMillis();
-        boolean ret = ((lastCheck == 0) || (today > lastCheck));
-        editor.putInt("lastcheck", nextweek);
-        editor.commit();
-        if(ret){
-            count_1 = 0;
-            week_order++;
-            editor.putInt("week_order", week_order);
-            editor.commit();
-        }
-
-        if(week_order > 4){
-            week_order = 1;
-            editor.putInt("week_order", week_order);
-            editor.commit();
-        }
-
-        if (count_1 < 1) {
-            if(week_order == 1) {
-                Intent questions = new Intent(getApplicationContext(), QuestionsActivity.class);
-                questions.putExtra("json_questions", loadlongQuestionnaireJson());
-                startActivityForResult(questions, QUESTIONNAIRE_REQUEST);
-                count_1++;
-                editor.putInt("count_1", count_1);
-                editor.commit();
-            }
-            if((week_order == 2) || (week_order == 3) || (week_order == 4)) {
-                Intent questions = new Intent(getApplicationContext(), QuestionsActivity.class);
-                questions.putExtra("json_questions", loadshortQuestionnaireJson());
-                startActivityForResult(questions, QUESTIONNAIRE_REQUEST);
-                count_1++;
-                editor.putInt("count_1", count_1);
-                editor.commit();
-            }
-        }
 
       /*      if (alarm_code == 1) {
                 Intent questions = new Intent(getApplicationContext(), QuestionActivity.class);
@@ -243,6 +166,7 @@ public class MainActivity extends BaseActivity {
                 }
             }
         });
+
     }
 
    /* public void startService(View v) {
@@ -495,6 +419,70 @@ public class MainActivity extends BaseActivity {
                     -> dialog.dismiss());
             builder.create().show();
         }
+        scheduleQuestionnaire();
+    }
+
+    private void scheduleQuestionnaire() {
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+        SharedPreferences.Editor editor = pref.edit();
+
+        //GET THE LAST CHECKED "NEXT PERIOD" FROM SHARED PREFERENCES
+        int lastCheck = pref.getInt("lastcheck", 0);
+        int start_of_this_period = pref.getInt("startofthisperiod", (int) System.currentTimeMillis());
+
+        int period_order = pref.getInt("period_order", 0);
+
+        //GET THE NUMBER OF TIMES IN THIS PERIOD THE ACTIVITY WAS OPENED FROM SHARED PREFERENCES
+        int count_1 = pref.getInt("count_1", 0);
+
+        // IF IT IS A NEW PERIOD START COUNTING FROM 0 AGAIN
+        int period_in_minutes = 60;
+        int current_time = (int) System.currentTimeMillis();
+        int start_of_next_period = start_of_this_period + period_in_minutes*60*1000;
+        //boolean ret = ((lastCheck == 0) || (current_time > lastCheck));
+        if(lastCheck == 0){
+            count_1 = 0;
+            period_order++;
+            editor.putInt("period_order", period_order);
+            editor.commit();
+            editor.putInt("lastcheck", start_of_next_period);
+            editor.commit();
+        }
+        if((lastCheck > 0) && (current_time > lastCheck)){
+            count_1 = 0;
+            period_order++;
+            editor.putInt("period_order", period_order);
+            editor.commit();
+            editor.putInt("startofthisperiod", start_of_next_period);
+            editor.commit();
+            editor.putInt("lastcheck", start_of_next_period);
+            editor.commit();
+        }
+
+        if(period_order > 4){
+            period_order = 1;
+            editor.putInt("period_order", period_order);
+            editor.commit();
+        }
+
+        if (count_1 < 1) {
+            if(period_order == 1) {
+                Intent questions = new Intent(getApplicationContext(), QuestionsActivity.class);
+                questions.putExtra("json_questions", loadlongQuestionnaireJson());
+                startActivityForResult(questions, QUESTIONNAIRE_REQUEST);
+                count_1++;
+                editor.putInt("count_1", count_1);
+                editor.commit();
+            }
+            if((period_order == 2) || (period_order == 3) || (period_order == 4)) {
+                Intent questions = new Intent(getApplicationContext(), QuestionsActivity.class);
+                questions.putExtra("json_questions", loadshortQuestionnaireJson());
+                startActivityForResult(questions, QUESTIONNAIRE_REQUEST);
+                count_1++;
+                editor.putInt("count_1", count_1);
+                editor.commit();
+            }
+        }
     }
 
     //json stored in the assets folder. but you can get it from wherever you like.
@@ -533,21 +521,4 @@ public class MainActivity extends BaseActivity {
         }
     }
 
- /*   // GET THE CURRENT DAY IN THE MONTH AND COMPARE IT WITH THE LAST CHECKED
-    public boolean isNewWeek() {
-        Calendar next_week = Calendar.getInstance();
-        next_week.set(Calendar.HOUR_OF_DAY, 0);
-        next_week.clear(Calendar.MINUTE);
-        next_week.clear(Calendar.SECOND);
-        next_week.clear(Calendar.MILLISECOND);
-        next_week.set(Calendar.DAY_OF_WEEK, next_week.getFirstDayOfWeek());
-        next_week.add(Calendar.WEEK_OF_YEAR, 1);
-        int nextweek = (int) next_week.getTimeInMillis();
-        int today = (int) System.currentTimeMillis();
-        boolean ret = lastCheck == 0 || today > lastcheck;
-        lastCheck = nextweek;
-        editor.putInt("lastcheck", nextweek);
-        editor.commit();
-        return ret;
-    }*/
 }

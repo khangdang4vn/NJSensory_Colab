@@ -19,7 +19,7 @@
     <string name="title_activity_setting">Setting</string>
     <string name="title_activity_label">Label</string>
     <string name="dialog_title">ExtraSensory</string>
-    <string name="message_cant_report_zero_labels">Must have Some label.</string>
+    <string name="message_cant_report_zero_labels">Must choose labels.</string>
     <string name="api_upload_zip">upload_sensor_data</string>
     <string name="api_feedback">user_labels</string>
     <string name="REC">REC</string>

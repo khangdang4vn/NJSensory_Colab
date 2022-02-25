@@ -198,7 +198,6 @@ public class FeedbackActivity extends BaseActivity {
         if (_labelStruct._mainActivity == null) {
             _labelStruct._mainActivity = getString(R.string.not_sure_dummy_label);
         }
-
         feedbackFlag = false;
         presentFeedbackView();
 
@@ -375,8 +374,8 @@ public class FeedbackActivity extends BaseActivity {
                     boolean emptyMain = (_labelStruct._mainActivity == null) || (_labelStruct._mainActivity.equals(getString(R.string.not_sure_dummy_label)));
                     boolean emptySec = (_labelStruct._secondaryActivities == null) || (_labelStruct._secondaryActivities.length <= 0);
                     boolean emptyMood = (_labelStruct._moods == null) || (_labelStruct._moods.length <= 0);
-                    boolean emptyDuration = (_labelStruct._mainActivity == null) || (_labelStruct._mainActivity.equals(getString(R.string.not_sure_dummy_label)));
-                    if (emptyMain && emptySec && emptyMood) {
+                    boolean emptyDuration = (_validFor == null) || (_validFor.equals("0 minute"));
+                    if (emptyMain || emptySec || emptyMood) {
                         // custom dialog
                         final Dialog dialog = new Dialog(context);
                         dialog.setContentView(R.layout.activity_feedback_dialog);
@@ -385,6 +384,28 @@ public class FeedbackActivity extends BaseActivity {
                         // set the custom dialog components - text, image and button
                         TextView text = (TextView) dialog.findViewById(R.id.feedback_dialog_text);
                         text.setText(R.string.message_cant_report_zero_labels);
+
+                        Button dialogButton = (Button) dialog.findViewById(R.id.feedback_dialogButtonOK);
+                        // if button is clicked, close the custom dialog
+                        dialogButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                        dialog.show();
+                        return;
+                    }
+                    if (emptyDuration) {
+                        // custom dialog
+                        final Dialog dialog = new Dialog(context);
+                        dialog.setContentView(R.layout.activity_feedback_dialog);
+                        dialog.setTitle(R.string.dialog_title);
+
+                        // set the custom dialog components - text, image and button
+                        TextView text = (TextView) dialog.findViewById(R.id.feedback_dialog_text);
+                        text.setText("Must choose duration");
 
                         Button dialogButton = (Button) dialog.findViewById(R.id.feedback_dialogButtonOK);
                         // if button is clicked, close the custom dialog

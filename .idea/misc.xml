@@ -13,13 +13,16 @@
         <entry key="app/src/main/res/layout/activity_questionnaire.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_questionnaire_answers.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_questionnaire_question.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/activity_setting.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_setting.xml" value="0.17333333333333334" />
         <entry key="app/src/main/res/layout/fragment_history.xml" value="0.1375" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.1" />
         <entry key="app/src/main/res/layout/main.xml" value="0.15520833333333334" />
         <entry key="app/src/main/res/layout/progress_view.xml" value="0.1" />
         <entry key="app/src/main/res/layout/questionnaire_footer.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/row_in_selection_from_list.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/row_in_summary_list.xml" value="0.1" />
         <entry key="app/src/main/res/menu/menu_main.xml" value="0.13645833333333332" />
+        <entry key="app/src/main/res/menu/menu_selection_from_list.xml" value="0.1" />
       </map>
     </option>
   </component>

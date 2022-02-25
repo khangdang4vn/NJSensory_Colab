@@ -115,7 +115,7 @@ public class SettingsActivity extends BaseActivity {
 
 
         // Num examples stored before sending:
-        SeekBar numExamplesStoreBeforeSendSeekBar = (SeekBar)findViewById(R.id.num_examples_store_before_send_seek_bar);
+      /*  SeekBar numExamplesStoreBeforeSendSeekBar = (SeekBar)findViewById(R.id.num_examples_store_before_send_seek_bar);
         numExamplesStoreBeforeSendSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -133,7 +133,7 @@ public class SettingsActivity extends BaseActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
 
             }
-        });
+        });*/
 
       /*  // Secure communication:
         RadioGroup useHttpsRG = (RadioGroup)findViewById(R.id.radio_group_use_https);
@@ -155,22 +155,22 @@ public class SettingsActivity extends BaseActivity {
 
 
         // Cellular communication:
-        RadioGroup allowCellularRG = (RadioGroup)findViewById(R.id.radio_group_allow_cellular);
+     /*   RadioGroup allowCellularRG = (RadioGroup)findViewById(R.id.radio_group_allow_cellular);
         allowCellularRG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 switch (checkedId) {
-                  /*  case R.id.radio_allow_cellular_on:
+                    case R.id.radio_allow_cellular_on:
                         ESSettings.setAllowCellular(true);
-                        break;*/
-                    case R.id.radio_allow_cellular_off:
-                        ESSettings.setAllowCellular(false);
                         break;
-                    default:
-                        Log.e(LOG_TAG,"got unexpected id for radio group of cellular communication");
+                 //   case R.id.radio_allow_cellular_off:
+                 //       ESSettings.setAllowCellular(false);
+                 //       break;
+                 //   default:
+                 //       Log.e(LOG_TAG,"got unexpected id for radio group of cellular communication");
                 }
             }
-        });
+        }); */
 
        /* // Location bubble:
         RadioGroup locationUsedRG = (RadioGroup)findViewById(R.id.radio_group_location_bubble);
@@ -248,7 +248,7 @@ public class SettingsActivity extends BaseActivity {
         }); */
 
         // Save user-labels files:
-        RadioGroup saveUserLabelsFilesRG = (RadioGroup)findViewById(R.id.radio_group_save_user_labels_files);
+       /* RadioGroup saveUserLabelsFilesRG = (RadioGroup)findViewById(R.id.radio_group_save_user_labels_files);
         saveUserLabelsFilesRG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -263,7 +263,7 @@ public class SettingsActivity extends BaseActivity {
                         Log.e(LOG_TAG,"got unexpected id for radio group of save-prediction-files");
                 }
             }
-        });
+        });*/
 
 
     /*    // Classifier settings:
@@ -345,9 +345,9 @@ public class SettingsActivity extends BaseActivity {
 
         // Set the number of examples stored before sending:
         int numExamplesStoreBeforeSend = ESSettings.numExamplesStoreBeforeSend();
-        displayNumExamplesStoreBeforeSend(numExamplesStoreBeforeSend);
-        SeekBar numExSeekBar = (SeekBar)findViewById(R.id.num_examples_store_before_send_seek_bar);
-        numExSeekBar.setProgress(numExamplesStoreBeforeSend);
+        //displayNumExamplesStoreBeforeSend(numExamplesStoreBeforeSend);
+        //SeekBar numExSeekBar = (SeekBar)findViewById(R.id.num_examples_store_before_send_seek_bar);
+       // numExSeekBar.setProgress(numExamplesStoreBeforeSend);
 
       /*  // Secure communication:
         boolean useHttps = ESNetworkAccessor.getESNetworkAccessor().get_useHttps();
@@ -360,14 +360,14 @@ public class SettingsActivity extends BaseActivity {
         } */
 
         // Cellular communication:
-        boolean allowCellular = ESSettings.isCellularAllowed();
+    /*    boolean allowCellular = //ESSettings.isCellularAllowed();
         RadioGroup allowCellularRG = (RadioGroup)findViewById(R.id.radio_group_allow_cellular);
         if (allowCellular) {
             allowCellularRG.check(R.id.radio_allow_cellular_off);
         }
         else {
             allowCellularRG.check(R.id.radio_allow_cellular_off);
-        }
+        } */
 
         // Location bubble:
      /*   Location bubbleCenter = ESSettings.locationBubbleCenter();
@@ -409,13 +409,13 @@ public class SettingsActivity extends BaseActivity {
         } */
 
         // should save user-labels files:
-        RadioGroup saveUserLabelsFilesRG = (RadioGroup)findViewById(R.id.radio_group_save_user_labels_files);
+     /*   RadioGroup saveUserLabelsFilesRG = (RadioGroup)findViewById(R.id.radio_group_save_user_labels_files);
         if (ESSettings.saveUserLabelsFiles()) {
             saveUserLabelsFilesRG.check(R.id.radio_save_user_labels_files_on);
         }
         else {
             saveUserLabelsFilesRG.check(R.id.radio_save_user_labels_files_off);
-        }
+        }*/
 
      /*   // Classifier settings:
         EditText classifierTypeEdit = (EditText)findViewById(R.id.edit_classifier_type);
@@ -498,9 +498,9 @@ public class SettingsActivity extends BaseActivity {
     }*/
 
     private void displayNumExamplesStoreBeforeSend(int numExamplesStoreBeforeSend) {
-        TextView textView = (TextView)findViewById(R.id.num_examples_store_before_send_value);
-        String numStr = String.format(Locale.US,"%d",numExamplesStoreBeforeSend);
-        textView.setText(numStr);
+        //TextView textView = (TextView)findViewById(R.id.num_examples_store_before_send_value);
+      //  String numStr = String.format(Locale.US,"%d",numExamplesStoreBeforeSend);
+      //  textView.setText(numStr);
     }
 
 /*

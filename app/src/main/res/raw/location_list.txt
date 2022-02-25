@@ -1,15 +1,26 @@
-Home
-At office/desk
-In class
-In a meeting
-In a store
-At a restaurant
-At a bar/party
-On a bus
-In a car
-On a plane
-On a train
-Outdoor
-At the gym
-At a live performance
-At a sports event
+Indoor Personal_Home
+Indoor Personal_Dorm
+Indoor Personal_Hotel/Airbnb
+Workplace
+In Class
+In A Meeting
+In A Store
+At A Restaurant
+At A Bar
+Vehicle_Bus/Shuttle
+Vehicle_Car
+Vehicle_Plane
+Vehicle_Train/Subway
+Vehicle_Motorcycle
+Vehicle_Bike
+Gym
+Nature/Wilderness
+Indoor Public_Recreational
+Indoor Public_Educational
+Indoor Public_Party/Celebration/Event
+Indoor Public_Others
+Outdoor_Recreational
+Outdoor_Educational
+Outdoor_Party/Celebration/Event
+Outdoor_Normal Activities
+Outdoor_Others

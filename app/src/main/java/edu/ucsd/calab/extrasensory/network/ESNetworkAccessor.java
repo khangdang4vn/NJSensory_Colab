@@ -502,13 +502,13 @@ public class ESNetworkAccessor {
 //    }
 
     public boolean canWeUseNetworkNow() {
-        if (!ESSettings.isCellularAllowed()) {
+        //if (!ESSettings.isCellularAllowed()) {
             // Then only allowed to use network when having wifi:
             return isThereWiFiConnectivity();
-        }
+       // }
 
 //         Then allowed to use either wifi or cellular:
-        return isThereWiFiConnectivity() || isThereMobileConnectivity();
+      //  return isThereWiFiConnectivity() || isThereMobileConnectivity();
     }
 
     private boolean isThereMobileConnectivity() {

@@ -86,6 +86,15 @@ class PolarActivity : BaseActivity() {
         private val POLAR_HR = "polar_heart_rate"
         private var polarhrList = ArrayList<Int>()
 
+        private val POLAR_ACC_X = "polar_acc_x"
+        private var _polaraccxList = ArrayList<Int>()
+
+        private val POLAR_ACC_Y = "polar_acc_y"
+        private var _polaraccyList = ArrayList<Int>()
+
+        private val POLAR_ACC_Z = "polar_acc_z"
+        private var _polaracczList = ArrayList<Int>()
+
         // ATTENTION! Replace with the device ID from your device.
         //private var deviceId = "A Polar Device"
 

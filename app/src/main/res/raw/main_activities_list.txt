@@ -1,9 +1,12 @@
-Lying down
+Lying Down
+Standing
 Sitting
+Driving
 Walking
-Running
 Cycling
 Cooking
-Cleaning
-Workout
-Playing sports
+House Chores
+Exercising_Running
+Exercising_Gym-Aerobic
+Exercising_Gym-Anaerobic
+Exercising_Gym-Flexibility
